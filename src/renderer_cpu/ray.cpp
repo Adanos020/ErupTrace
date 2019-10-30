@@ -44,10 +44,10 @@ color ray::trace(const scene& in_scene, const int32_t depth) const
     if (depth > 0)
     {
         hit_record closest_hit = hit_record::nope();
-        closest_hit.t = FLT_MAX;
+        closest_hit.distance = FLT_MAX;
         for (const shape& it_shape : in_scene.shapes)
         {
-            const hit_record hit = ray_hits(in_scene, it_shape, *this, min_max<float>{ 0.0001f, closest_hit.t });
+            const hit_record hit = ray_hits(in_scene, it_shape, *this, min_max<float>{ 0.0001f, closest_hit.distance });
             if (hit.occurred)
             {
                 closest_hit = hit;

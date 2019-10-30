@@ -19,15 +19,15 @@ private:
     std::array<uint32_t, N_PERMUTATIONS> z_permutations;
 };
 
-inline static float turbulence(const perlin& noise, const glm::vec3& p, int depth = 7)
+inline static float turbulence(const perlin& in_noise, const glm::vec3& in_p, int in_depth = 7)
 {
     float accumulate = 0.f;
     float weight = 1.f;
-    glm::vec3 p_pow2 = p;
+    glm::vec3 p_pow2 = in_p;
 
-    for (; depth > 0; --depth)
+    for (; in_depth > 0; --in_depth)
     {
-        accumulate += weight * noise.noise(p_pow2);
+        accumulate += weight * in_noise.noise(p_pow2);
         weight *= 0.5f;
         p_pow2 *= 2.f;
     }

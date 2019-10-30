@@ -8,7 +8,7 @@
 
 struct hit_record
 {
-    float t;
+    float distance;
     position_3d point;
     displacement_3d normal;
     material mat;
@@ -22,12 +22,12 @@ struct hit_record
     }
 };
 
-inline static hit_record ray_hits(const plane_shape& in_plane, const ray& in_ray, const min_max<float>& t)
+inline static hit_record ray_hits(const plane_shape& in_plane, const ray& in_ray, const min_max<float>& in_distance)
 {
     if (const float dot = glm::dot(in_plane.front, in_ray.direction); dot != 0.f)
     {
         const displacement_3d displacement = in_plane.origin - in_ray.origin;
-        if (const float t1 = glm::dot(in_plane.front, displacement) / dot; t.is_value_clamped(t1))
+        if (const float t1 = glm::dot(in_plane.front, displacement) / dot; in_distance.is_value_clamped(t1))
         {
             const position_3d hit_point = in_ray.point_at_parameter(t1);
             return hit_record{ t1, hit_point, (-1.f + 2.f * float(dot < 0.f)) * in_plane.front, {}, /*texture_mapping*/ };
@@ -36,7 +36,7 @@ inline static hit_record ray_hits(const plane_shape& in_plane, const ray& in_ray
     return hit_record::nope();
 }
 
-inline static hit_record ray_hits(const sphere_shape& in_sphere, const ray& in_ray, const min_max<float>& t)
+inline static hit_record ray_hits(const sphere_shape& in_sphere, const ray& in_ray, const min_max<float>& in_distance)
 {
     const displacement_3d oc = in_ray.origin - in_sphere.origin;
     const float a = glm::dot(in_ray.direction, in_ray.direction);
@@ -47,11 +47,11 @@ inline static hit_record ray_hits(const sphere_shape& in_sphere, const ray& in_r
     if (discriminant > 0.f)
     {
         float root = (-b - glm::sqrt(discriminant)) / a;
-        if (!t.is_value_clamped(root))
+        if (!in_distance.is_value_clamped(root))
         {
             root = (-b + glm::sqrt(discriminant)) / a;
         }
-        if (t.is_value_clamped(root))
+        if (in_distance.is_value_clamped(root))
         {
             const position_3d hit_point = in_ray.point_at_parameter(root);
             const uv_mapping texture_coord = uv_on_sphere((hit_point - in_sphere.origin) / in_sphere.radius, in_sphere.axial_tilt);
@@ -61,7 +61,7 @@ inline static hit_record ray_hits(const sphere_shape& in_sphere, const ray& in_r
     return hit_record::nope();
 }
 
-inline static hit_record ray_hits(const triangle_shape& in_triangle, const ray& in_ray, const min_max<float>& t)
+inline static hit_record ray_hits(const triangle_shape& in_triangle, const ray& in_ray, const min_max<float>& in_distance)
 {
     // Möller-Trumbore algorithm
     const displacement_3d edge_1 = in_triangle.b - in_triangle.a;
@@ -77,26 +77,30 @@ inline static hit_record ray_hits(const triangle_shape& in_triangle, const ray& 
         const float v = glm::dot(in_ray.direction, q_vec) * inverse_determinant;
         if (u >= 0.f && u <= 1.f && v >= 0.f && u + v <= 1.f)
         {
-            if (const float out_t = inverse_determinant * glm::dot(q_vec, edge_2); t.is_value_clamped(out_t))
+            if (const float distance = glm::dot(q_vec, edge_2) * inverse_determinant; in_distance.is_value_clamped(distance))
             {
-                const position_3d hit_point = in_ray.origin + (out_t * in_ray.direction);
-                const direction_3d normal = ((1.f - u - v) * in_triangle.normal_a) + (v * in_triangle.normal_b) + (u * in_triangle.normal_c);
-                return hit_record{ out_t, hit_point, normal, {}, uv_mapping{} };
+                const position_3d hit_point = in_ray.origin + (distance * in_ray.direction);
+                const direction_3d normal = ((1.f - u - v) * in_triangle.normal_a) + (u * in_triangle.normal_b) + (v * in_triangle.normal_c);
+                const uv_mapping texture_mapping = {
+                    ((1.f - u - v) * in_triangle.uv_a.u) + (u * in_triangle.uv_b.u) + (v * in_triangle.uv_c.u),
+                    ((1.f - u - v) * in_triangle.uv_a.v) + (u * in_triangle.uv_b.v) + (v * in_triangle.uv_c.v),
+                };
+                return hit_record{ distance, hit_point, normal, {}, texture_mapping };
             }
         }
     }
     return hit_record::nope();
 }
 
-inline static hit_record ray_hits(const scene& in_scene, const shape& in_shape, const ray& in_ray, const min_max<float>& t)
+inline static hit_record ray_hits(const scene& in_scene, const shape& in_shape, const ray& in_ray, const min_max<float>& in_distance)
 {
     auto hit = hit_record::nope();
 
     switch (in_shape.type)
     {
-        case shape_type::plane:    hit = ray_hits(in_scene.plane_shapes[in_shape.index], in_ray, t); break;
-        case shape_type::sphere:   hit = ray_hits(in_scene.sphere_shapes[in_shape.index], in_ray, t); break;
-        case shape_type::triangle: hit = ray_hits(in_scene.triangle_shapes[in_shape.index], in_ray, t); break;
+        case shape_type::plane:    hit = ray_hits(in_scene.plane_shapes[in_shape.index], in_ray, in_distance); break;
+        case shape_type::sphere:   hit = ray_hits(in_scene.sphere_shapes[in_shape.index], in_ray, in_distance); break;
+        case shape_type::triangle: hit = ray_hits(in_scene.triangle_shapes[in_shape.index], in_ray, in_distance); break;
         default: break;
     }
 
