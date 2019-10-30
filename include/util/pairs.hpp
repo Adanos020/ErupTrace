@@ -18,6 +18,11 @@ struct min_max
         : min(pair.first), max(pair.second)
     {
     }
+
+    constexpr bool is_value_clamped(const T& value) const
+    {
+        return value >= min && value <= max;
+    }
 };
 
 template <typename T>

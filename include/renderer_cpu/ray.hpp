@@ -10,7 +10,7 @@ struct ray : line
     const float time;
 
     ray();
-    ray(const line&, const float time = 0.f);
+    ray(const line&, float time = 0.f);
     static ray shoot(const struct camera&, const uv_mapping&);
-    color trace(const struct scene&, const int32_t depth = 50) const;
+    color trace(const struct scene&, int32_t depth = 50) const;
 };

@@ -5,7 +5,11 @@
 
 enum class material_type
 {
-    none, dielectric, diffuse_light, lambertian, metal
+    none,
+    dielectric,
+    diffuse,
+    emit_light,
+    reflect,
 };
 
 struct material
@@ -20,17 +24,17 @@ struct dielectric_material
     texture albedo;
 };
 
-struct diffuse_light_material
-{
-    texture emit;
-};
-
-struct lambertian_material
+struct diffuse_material
 {
     texture albedo;
 };
 
-struct metal_material
+struct emit_light_material
+{
+    texture emit;
+};
+
+struct reflect_material
 {
     float fuzz;
     texture albedo;

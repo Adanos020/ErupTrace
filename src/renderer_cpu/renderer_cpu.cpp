@@ -42,7 +42,7 @@ std::vector<rgba> renderer_cpu::render_scene(const render_plan& plan)
     return image;
 }
 
-std::vector<rgba> renderer_cpu::render_fragment(const render_plan* plan, const glm::uvec2 top_left, const glm::uvec2 bottom_right)
+std::vector<rgba> renderer_cpu::render_fragment(const render_plan* plan, const position_2d& top_left, const position_2d& bottom_right)
 {
     const uint32_t width = bottom_right.x - top_left.x;
     const uint32_t height = bottom_right.y - top_left.y;

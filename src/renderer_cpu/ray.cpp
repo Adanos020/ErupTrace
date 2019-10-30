@@ -3,6 +3,7 @@
 #include <render_objects/camera.hpp>
 #include <render_objects/textures.hpp>
 #include <render_objects/scene.hpp>
+#include <renderer_cpu/emitting.hpp>
 #include <renderer_cpu/hit.hpp>
 #include <renderer_cpu/scattering.hpp>
 #include <renderer_cpu/textures.hpp>
@@ -59,7 +60,9 @@ color ray::trace(const scene& in_scene, const int32_t depth) const
             {
                 return sc.attenuation * sc.scattered_ray.trace(in_scene, depth - 1);
             }
+            return emit(in_scene, closest_hit.mat, closest_hit);
         }
     }
-    return color_on_texture(in_scene, in_scene.sky, uv_on_sphere(glm::normalize(this->direction)), this->origin + this->direction);
+    return color_on_texture(in_scene, in_scene.sky, uv_on_sphere(glm::normalize(this->direction), y_axis),
+        this->origin + this->direction);
 }

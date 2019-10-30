@@ -10,5 +10,5 @@ struct render_plan
     camera cam;
     scene world;
 
-    static render_plan hello_ball(const extent_2d<uint32_t>& image_size);
+    static render_plan test_scene(const extent_2d<uint32_t>& image_size);
 };

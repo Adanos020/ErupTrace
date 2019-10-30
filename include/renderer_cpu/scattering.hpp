@@ -49,27 +49,27 @@ inline static scattering scatter(const scene& in_scene, const dielectric_materia
     return scattering{ col, ray{ line{ in_hit.point, refracted }, in_ray.time } };
 }
 
-inline static scattering scatter(const scene& in_scene, const diffuse_light_material& in_diffuse_light, const ray& in_ray, const hit_record& in_hit)
-{
-    return scattering::nope();
-}
-
-inline static scattering scatter(const scene& in_scene, const lambertian_material& in_lambertian, const ray& in_ray, const hit_record& in_hit)
+inline static scattering scatter(const scene& in_scene, const diffuse_material& in_diffuse, const ray& in_ray, const hit_record& in_hit)
 {
     const position_3d target = in_hit.point + in_hit.normal + random_direction();
     return scattering{
-        color_on_texture(in_scene, in_lambertian.albedo, in_hit.texture_coord, in_hit.point),
+        color_on_texture(in_scene, in_diffuse.albedo, in_hit.texture_coord, in_hit.point),
         ray{ line{ in_hit.point, target - in_hit.point }, in_ray.time },
     };
 }
 
-inline static scattering scatter(const scene& in_scene, const metal_material& in_metal, const ray& in_ray, const hit_record& in_hit)
+inline static scattering scatter(const scene& in_scene, const emit_light_material& in_emit_light, const ray& in_ray, const hit_record& in_hit)
+{
+    return scattering::nope();
+}
+
+inline static scattering scatter(const scene& in_scene, const reflect_material& in_reflect, const ray& in_ray, const hit_record& in_hit)
 {
     const displacement_3d reflected = glm::reflect(glm::normalize(in_ray.direction), in_hit.normal);
-    const ray scattered = { line{ in_hit.point, reflected + (in_metal.fuzz * random_direction()) }, in_ray.time };
+    const ray scattered = { line{ in_hit.point, reflected + (in_reflect.fuzz * random_direction()) }, in_ray.time };
     if (glm::dot(scattered.direction, in_hit.normal) > 0.f)
     {
-        return scattering{ color_on_texture(in_scene, in_metal.albedo, in_hit.texture_coord, in_hit.point), scattered };
+        return scattering{ color_on_texture(in_scene, in_reflect.albedo, in_hit.texture_coord, in_hit.point), scattered };
     }
     return scattering::nope();
 }
@@ -78,14 +78,10 @@ inline static scattering scatter(const scene& in_scene, const material& in_mater
 {
     switch (in_material.type)
     {
-        case material_type::dielectric:   
-            return scatter(in_scene, in_scene.dielectric_materials[in_material.index], in_ray, in_hit);
-        case material_type::diffuse_light:
-            return scatter(in_scene, in_scene.diffuse_light_materials[in_material.index], in_ray, in_hit);
-        case material_type::lambertian:   
-            return scatter(in_scene, in_scene.lambertian_materials[in_material.index], in_ray, in_hit);
-        case material_type::metal:        
-            return scatter(in_scene, in_scene.metal_materials[in_material.index], in_ray, in_hit);
+        case material_type::dielectric: return scatter(in_scene, in_scene.dielectric_materials[in_material.index], in_ray, in_hit);
+        case material_type::emit_light: return scatter(in_scene, in_scene.emit_light_materials[in_material.index], in_ray, in_hit);
+        case material_type::diffuse:    return scatter(in_scene, in_scene.diffuse_materials[in_material.index], in_ray, in_hit);
+        case material_type::reflect:    return scatter(in_scene, in_scene.reflect_materials[in_material.index], in_ray, in_hit);
         default: break;
     }
     return scattering::nope();

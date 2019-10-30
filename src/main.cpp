@@ -3,7 +3,7 @@
 #include <util/string.hpp>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb_image_write.h>
+#include <external/stb_image_write.h>
 
 #include <iostream>
 #include <string>
@@ -42,7 +42,7 @@ int main()
     try
     {
         const extent_2d<uint32_t> image_size = { 1600, 900 };
-        const render_plan plan = render_plan::hello_ball(image_size);
+        const render_plan plan = render_plan::test_scene(image_size);
         const std::vector<rgba> image = renderer_cpu{ 500, 20 }.render_scene(plan);
         export_image(image, image_size, "test.png");
     }

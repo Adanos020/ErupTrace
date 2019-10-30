@@ -6,11 +6,11 @@
 #include <util/sizes.hpp>
 #include <util/vector_types.hpp>
 
-#include <optional>
+#include <array>
 
 enum class shape_type
 {
-    none, sphere, plane, rectangle, box, textured_box, triangle, mesh
+    none, sphere, plane, triangle
 };
 
 struct shape
@@ -22,35 +22,16 @@ struct shape
 
 struct sphere_shape : sphere
 {
-    rotator rotation;
+    direction_3d axial_tilt;
 };
 
 struct plane_shape : plane
 {
+    min_max<position_3d> textured_area;
 };
 
-struct rectangle_shape : rectangle
+struct triangle_shape : triangle
 {
-};
-
-struct box_shape : cuboid
-{
-};
-
-struct textured_box_shape : cuboid
-{
-    texture front_texture;
-    texture back_texture;
-    texture top_texture;
-    texture bottom_texture;
-    texture left_texture;
-    texture right_texture;
-};
-
-struct triangle_shape
-{
-};
-
-struct mesh
-{
+    direction_3d normal_a, normal_b, normal_c;
+    uv_mapping uv_a, uv_b, uv_c;
 };

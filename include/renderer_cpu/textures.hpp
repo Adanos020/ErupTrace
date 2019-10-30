@@ -20,12 +20,12 @@ inline static color color_on_texture(const scene& in_scene, const constant_textu
 
 inline static color color_on_texture(const scene& in_scene, const image_texture& in_texture, const uv_mapping& in_uv, const position_3d& in_position)
 {
-    return color{ 1.f };
+    return white;
 }
 
 inline static color color_on_texture(const scene& in_scene, const noise_texture& in_texture, const uv_mapping& in_uv, const position_3d& in_position)
 {
-    return color{ 1.f };
+    return white;
 }
 
 inline static color color_on_texture(const scene& in_scene, const texture& in_texture, const uv_mapping& in_uv, const position_3d& in_position)
