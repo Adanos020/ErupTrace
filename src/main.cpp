@@ -42,8 +42,8 @@ int main()
     try
     {
         const extent_2d<uint32_t> image_size = { 1600, 900 };
-        const render_plan plan = render_plan::test_scene(image_size);
-        const std::vector<rgba> image = renderer_cpu{ 50, 20 }.render_scene(plan);
+        const render_plan plan = render_plan::cornell_box(image_size);
+        const std::vector<rgba> image = renderer_cpu{ 500, 20 }.render_scene(plan);
         export_image(image, image_size, "test.png");
     }
     catch (const std::exception& e)

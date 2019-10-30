@@ -56,11 +56,12 @@ color ray::trace(const scene& in_scene, const int32_t depth) const
 
         if (closest_hit.occurred)
         {
+            const color emitted = emit(in_scene, closest_hit.mat, closest_hit);
             if (const scattering sc = scatter(in_scene, closest_hit.mat, *this, closest_hit); sc.occurred)
             {
-                return sc.attenuation * sc.scattered_ray.trace(in_scene, depth - 1);
+                return emitted + sc.attenuation * sc.scattered_ray.trace(in_scene, depth - 1);
             }
-            return emit(in_scene, closest_hit.mat, closest_hit);
+            return emitted;
         }
     }
     return color_on_texture(in_scene, in_scene.sky, uv_on_sphere(glm::normalize(this->direction), y_axis),

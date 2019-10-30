@@ -11,4 +11,5 @@ struct render_plan
     scene world;
 
     static render_plan test_scene(const extent_2d<uint32_t>& image_size);
+    static render_plan cornell_box(const extent_2d<uint32_t>& image_size);
 };
