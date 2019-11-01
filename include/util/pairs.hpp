@@ -61,10 +61,12 @@ struct uv_mapping
 template <typename T>
 struct iterator_pair
 {
-    typename T::iterator begin;
-    typename T::iterator end;
+    using iterator = typename T::iterator;
 
-    iterator_pair(typename T::iterator begin, typename T::iterator end)
+    iterator begin;
+    iterator end;
+
+    iterator_pair(iterator begin, iterator end)
         : begin(begin), end(end)
     {
     }
@@ -78,10 +80,12 @@ struct iterator_pair
 template <typename T>
 struct const_iterator_pair
 {
-    typename T::const_iterator begin;
-    typename T::const_iterator end;
+    using iterator = typename T::const_iterator;
 
-    const_iterator_pair(typename T::const_iterator begin, typename T::const_iterator end)
+    iterator begin;
+    iterator end;
+
+    const_iterator_pair(iterator begin, iterator end)
         : begin(begin), end(end)
     {
     }

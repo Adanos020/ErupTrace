@@ -8,6 +8,7 @@
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include <algorithm>
 #include <utility>
 
 enum class axis_plane
@@ -73,13 +74,36 @@ using yz_aligned_rectangle = plane_aligned_rectangle<axis_plane::yz>;
 using xz_aligned_rectangle = plane_aligned_rectangle<axis_plane::xz>;
 using xy_aligned_rectangle = plane_aligned_rectangle<axis_plane::xy>;
 
-struct axis_aligned_cuboid
+struct axis_aligned_box
 {
-    position_3d origin;
-    extent_3d<float> size;
+    position_3d min;
+    position_3d max;
 
-    static axis_aligned_cuboid cube(const position_3d& in_origin, const float in_size)
+    static axis_aligned_box zero()
     {
-        return axis_aligned_cuboid{ in_origin, extent_3d<float>{ in_size, in_size, in_size } };
+        return axis_aligned_box{ position_3d{ 0.f }, position_3d{ 0.f } };
+    }
+
+    static axis_aligned_box cuboid(const position_3d& in_origin, const extent_3d<float> in_half_size)
+    {
+        return axis_aligned_box{
+            in_origin - glm::vec3{ in_half_size.width, in_half_size.height, in_half_size.depth },
+            in_origin + glm::vec3{ in_half_size.width, in_half_size.height, in_half_size.depth },
+        };
+    }
+
+    static axis_aligned_box cuboid(const line& in_diagonal, const float in_length)
+    {
+        const position_3d a = in_diagonal.origin;
+        const position_3d b = in_diagonal.point_at_parameter(in_length);
+        return axis_aligned_box{
+            position_3d{ std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z) },
+            position_3d{ std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z) },
+        };
+    }
+
+    static axis_aligned_box cube(const position_3d& in_origin, const float in_half_size)
+    {
+        return cuboid(in_origin, { in_half_size, in_half_size, in_half_size });
     }
 };

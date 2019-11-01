@@ -33,7 +33,8 @@ ray ray::shoot(const camera& in_camera, const uv_mapping& in_direction)
 
     return ray{
         line { origin,
-            in_camera.lower_left_corner + (in_direction.u * in_camera.horizontal) + (in_direction.v * in_camera.vertical) - origin,
+            in_camera.lower_left_corner + (in_direction.u * in_camera.horizontal)
+                + (in_direction.v * in_camera.vertical) - origin,
         },
         random_uniform(in_camera.time.min, in_camera.time.max),
     };
@@ -43,21 +44,10 @@ color ray::trace(const scene& in_scene, const int32_t depth) const
 {
     if (depth > 0)
     {
-        hit_record closest_hit = hit_record::nope();
-        closest_hit.distance = FLT_MAX;
-        for (const shape& it_shape : in_scene.shapes)
+        if (const hit_record hit = ray_hits_anything(in_scene, *this); hit.occurred)
         {
-            const hit_record hit = ray_hits(in_scene, it_shape, *this, min_max<float>{ 0.0001f, closest_hit.distance });
-            if (hit.occurred)
-            {
-                closest_hit = hit;
-            }
-        }
-
-        if (closest_hit.occurred)
-        {
-            const color emitted = emit(in_scene, closest_hit.mat, closest_hit);
-            if (const scattering sc = scatter(in_scene, closest_hit.mat, *this, closest_hit); sc.occurred)
+            const color emitted = emit(in_scene, hit.mat, hit);
+            if (const scattering sc = scatter(in_scene, hit.mat, *this, hit); sc.occurred)
             {
                 return emitted + sc.attenuation * sc.scattered_ray.trace(in_scene, depth - 1);
             }

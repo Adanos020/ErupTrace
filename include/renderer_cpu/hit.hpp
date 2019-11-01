@@ -6,6 +6,8 @@
 #include <util/pairs.hpp>
 #include <util/vector_types.hpp>
 
+#include <vector>
+
 struct hit_record
 {
     float distance;
@@ -79,7 +81,7 @@ inline static hit_record ray_hits(const triangle_shape& in_triangle, const ray& 
         {
             if (const float distance = glm::dot(q_vec, edge_2) * inverse_determinant; in_distance.is_value_clamped(distance))
             {
-                const position_3d hit_point = in_ray.origin + (distance * in_ray.direction);
+                const position_3d hit_point = in_ray.point_at_parameter(distance);
                 const direction_3d normal = ((1.f - u - v) * in_triangle.normal_a) + (u * in_triangle.normal_b) + (v * in_triangle.normal_c);
                 const uv_mapping texture_mapping = {
                     ((1.f - u - v) * in_triangle.uv_a.u) + (u * in_triangle.uv_b.u) + (v * in_triangle.uv_c.u),
@@ -95,7 +97,6 @@ inline static hit_record ray_hits(const triangle_shape& in_triangle, const ray& 
 inline static hit_record ray_hits(const scene& in_scene, const shape& in_shape, const ray& in_ray, const min_max<float>& in_distance)
 {
     auto hit = hit_record::nope();
-
     switch (in_shape.type)
     {
         case shape_type::plane:    hit = ray_hits(in_scene.plane_shapes[in_shape.index], in_ray, in_distance); break;
@@ -103,10 +104,24 @@ inline static hit_record ray_hits(const scene& in_scene, const shape& in_shape, 
         case shape_type::triangle: hit = ray_hits(in_scene.triangle_shapes[in_shape.index], in_ray, in_distance); break;
         default: break;
     }
-
     if (hit.occurred)
     {
         hit.mat = in_shape.mat;
     }
     return hit;
+}
+
+inline static hit_record ray_hits_anything(const scene& in_scene, const ray& in_ray)
+{
+    hit_record closest_hit = hit_record::nope();
+    closest_hit.distance = FLT_MAX;
+
+    for (const shape& it_shape : in_scene.shapes)
+    {
+        if (const hit_record hit = ray_hits(in_scene, it_shape, in_ray, { 0.0001f, closest_hit.distance }); hit.occurred)
+        {
+            closest_hit = hit;
+        }
+    }
+    return closest_hit;
 }

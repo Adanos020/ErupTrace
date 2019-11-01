@@ -30,21 +30,21 @@ render_plan render_plan::test_scene(const extent_2d<uint32_t>& image_size)
     world.add_triangle_shape(triangle{
         position_3d{ -1.f, -0.2f, 0.5f },
         position_3d{  1.f, -0.2f, 0.5f },
-        position_3d{ -1.f,  0.5f, 0.5f }, }, direction_3d{ 0.f, 0.f, -1.f }, {}, mirror_material);
+        position_3d{ -1.f,  0.5f, 0.5f }, }, -z_axis, {}, mirror_material);
     world.add_triangle_shape(triangle{
         position_3d{  1.f,  0.5f, 0.5f },
         position_3d{ -1.f,  0.5f, 0.5f },
-        position_3d{  1.f, -0.2f, 0.5f }, }, direction_3d{ 0.f, 0.f, -1.f }, {}, mirror_material);
+        position_3d{  1.f, -0.2f, 0.5f }, }, -z_axis, {}, mirror_material);
 
     const material light_material = world.add_emit_light_material(world.add_constant_texture(white));
     world.add_triangle_shape(triangle{
         position_3d{ -1.f,  0.5f,  0.5f },
         position_3d{ -1.f, -0.2f,  0.5f },
-        position_3d{ -1.f, -0.2f, -0.5f }, }, -z_axis, {}, light_material);
+        position_3d{ -1.f, -0.2f, -0.5f }, }, x_axis, {}, light_material);
     world.add_triangle_shape(triangle{
         position_3d{ -1.f,  0.5f,  0.5f },
         position_3d{ -1.f,  0.5f, -0.5f },
-        position_3d{ -1.f, -0.2f, -0.5f }, }, -z_axis, {}, light_material);
+        position_3d{ -1.f, -0.2f, -0.5f }, }, x_axis, {}, light_material);
 
     world.add_sphere_shape(sphere{ position_3d{ -0.2f, 0.5f, 0.2f }, 0.2f }, y_axis,
         world.add_emit_light_material(world.add_constant_texture(color{ 1.f, 1.f, 0.5f })));

@@ -96,7 +96,7 @@ size_t scene::size() const
 
 shape scene::add_sphere_shape(const sphere_shape& in_sphere, const material& in_material)
 {
-    this->shapes.push_back(shape{ shape_type::sphere, this->sphere_shapes.size(), in_material });
+    this->shapes.push_back(shape{ shape_type::sphere, this->sphere_shapes.size(), in_material, in_sphere.bounding_box() });
     this->sphere_shapes.push_back(in_sphere);
     return this->shapes.back();
 }
@@ -108,7 +108,7 @@ shape scene::add_sphere_shape(const sphere& in_sphere, const direction_3d& in_ax
 
 shape scene::add_plane_shape(const plane_shape& in_plane, const material& in_material)
 {
-    this->shapes.push_back(shape{ shape_type::plane, this->plane_shapes.size(), in_material });
+    this->shapes.push_back(shape{ shape_type::plane, this->plane_shapes.size(), in_material, in_plane.bounding_box() });
     this->plane_shapes.push_back(in_plane);
     return this->shapes.back();
 }
@@ -120,7 +120,7 @@ shape scene::add_plane_shape(const plane& in_plane, const min_max<position_3d>& 
 
 shape scene::add_triangle_shape(const triangle_shape& in_triangle, const material& in_material)
 {
-    this->shapes.push_back(shape{ shape_type::triangle, this->triangle_shapes.size(), in_material });
+    this->shapes.push_back(shape{ shape_type::triangle, this->triangle_shapes.size(), in_material, in_triangle.bounding_box() });
     this->triangle_shapes.push_back(in_triangle);
     return this->shapes.back();
 }

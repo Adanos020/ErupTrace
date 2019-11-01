@@ -18,3 +18,11 @@ static constexpr direction_2d up_2d = { 0.f, 1.f };
 static constexpr direction_2d down_2d = { 0.f, -1.f };
 static constexpr direction_2d left_2d = { 1.f, 0.f };
 static constexpr direction_2d right_2d = { 1.f, 0.f };
+
+enum class vector_component
+{
+    x,
+    y,
+    z,
+    xyz,
+};

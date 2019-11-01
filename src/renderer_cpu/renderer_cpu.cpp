@@ -1,5 +1,6 @@
 #include <renderer_cpu/renderer_cpu.hpp>
 
+#include <render_objects/hierarchy.hpp>
 #include <render_objects/render_plan.hpp>
 #include <renderer_cpu/ray.hpp>
 #include <util/random.hpp>
