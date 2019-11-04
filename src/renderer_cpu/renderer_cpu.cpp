@@ -16,6 +16,8 @@ renderer_cpu::renderer_cpu(const uint32_t sample_count, const uint32_t thread_co
 
 std::vector<rgba> renderer_cpu::render_scene(const render_plan& plan)
 {
+    bounding_interval_hierarchy hierarchy = make_hierarchy(plan.world.shapes, 1.f / 6.f);
+
     const uint32_t fragment_height = plan.image_size.height / this->thread_count;
 
     std::cout << "Starting jobs... ";

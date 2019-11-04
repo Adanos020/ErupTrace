@@ -37,19 +37,7 @@ struct plane_shape : plane
 
     axis_aligned_box bounding_box() const
     {
-        if (glm::abs(this->front) == x_axis)
-        {
-            return axis_aligned_box::cuboid(this->origin, { 0.f, FLT_MAX, FLT_MAX });
-        }
-        if (glm::abs(this->front) == y_axis)
-        {
-            return axis_aligned_box::cuboid(this->origin, { FLT_MAX, 0.f, FLT_MAX });
-        }
-        if (glm::abs(this->front) == z_axis)
-        {
-            return axis_aligned_box::cuboid(this->origin, { FLT_MAX, FLT_MAX, 0.f });
-        }
-        return axis_aligned_box::cube(this->origin, FLT_MAX);
+        return axis_aligned_box::zero();
     }
 };
 

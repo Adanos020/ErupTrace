@@ -21,7 +21,7 @@ struct line
     position_3d origin;
     direction_3d direction;
 
-    position_3d point_at_parameter(const float t) const
+    position_3d point_at_distance(const float t) const
     {
         return origin + t * direction;
     }
@@ -95,7 +95,7 @@ struct axis_aligned_box
     static axis_aligned_box cuboid(const line& in_diagonal, const float in_length)
     {
         const position_3d a = in_diagonal.origin;
-        const position_3d b = in_diagonal.point_at_parameter(in_length);
+        const position_3d b = in_diagonal.point_at_distance(in_length);
         return axis_aligned_box{
             position_3d{ std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z) },
             position_3d{ std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z) },

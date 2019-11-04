@@ -10,7 +10,7 @@ struct scene
 {
     texture sky;
 
-    std::vector<shape> shapes;
+    mutable std::vector<shape> shapes;
     std::vector<sphere_shape> sphere_shapes;
     std::vector<plane_shape> plane_shapes;
     std::vector<triangle_shape> triangle_shapes;
@@ -28,10 +28,10 @@ struct scene
     std::vector<uint8_t> to_bytes() const;
     size_t size() const;
 
-    shape add_sphere_shape(const sphere_shape&, const material&);
-    shape add_sphere_shape(const sphere&, const direction_3d& axial_tilt, const material&);
     shape add_plane_shape(const plane_shape&, const material&);
     shape add_plane_shape(const plane&, const min_max<position_3d>& textured_area, const material&);
+    shape add_sphere_shape(const sphere_shape&, const material&);
+    shape add_sphere_shape(const sphere&, const direction_3d& axial_tilt, const material&);
     shape add_triangle_shape(const triangle_shape&, const material&);
     shape add_triangle_shape(const triangle&, const std::array<direction_3d, 3>& normals,
         const std::array<uv_mapping, 3>&, const material&);

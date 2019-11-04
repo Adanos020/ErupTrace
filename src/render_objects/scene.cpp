@@ -94,6 +94,19 @@ size_t scene::size() const
 
 // Shapes
 
+shape scene::add_plane_shape(const plane_shape& in_plane, const material& in_material)
+{
+    this->shapes.push_back(shape{ shape_type::plane, this->plane_shapes.size(), in_material, in_plane.bounding_box() });
+    this->plane_shapes.push_back(in_plane);
+    std::swap(this->shapes.back(), this->shapes[this->plane_shapes.size() - 1]); // Put all plane shapes at the start.
+    return this->shapes[this->plane_shapes.size() - 1];
+}
+
+shape scene::add_plane_shape(const plane& in_plane, const min_max<position_3d>& in_textured_area, const material& in_material)
+{
+    return this->add_plane_shape(plane_shape{ in_plane, in_textured_area }, in_material);
+}
+
 shape scene::add_sphere_shape(const sphere_shape& in_sphere, const material& in_material)
 {
     this->shapes.push_back(shape{ shape_type::sphere, this->sphere_shapes.size(), in_material, in_sphere.bounding_box() });
@@ -104,18 +117,6 @@ shape scene::add_sphere_shape(const sphere_shape& in_sphere, const material& in_
 shape scene::add_sphere_shape(const sphere& in_sphere, const direction_3d& in_axial_tilt, const material& in_material)
 {
     return this->add_sphere_shape(sphere_shape{ in_sphere, in_axial_tilt }, in_material);
-}
-
-shape scene::add_plane_shape(const plane_shape& in_plane, const material& in_material)
-{
-    this->shapes.push_back(shape{ shape_type::plane, this->plane_shapes.size(), in_material, in_plane.bounding_box() });
-    this->plane_shapes.push_back(in_plane);
-    return this->shapes.back();
-}
-
-shape scene::add_plane_shape(const plane& in_plane, const min_max<position_3d>& in_textured_area, const material& in_material)
-{
-    return this->add_plane_shape(plane_shape{ in_plane, in_textured_area }, in_material);
 }
 
 shape scene::add_triangle_shape(const triangle_shape& in_triangle, const material& in_material)
