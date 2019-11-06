@@ -6,6 +6,7 @@ std::vector<uint8_t> scene::to_bytes() const
 {
     const size_t sky_size = sizeof(texture);
 
+    const size_t infinite_shapes_size = sizeof(shape) * this->infinite_shapes.size();
     const size_t shapes_size = sizeof(shape) * this->shapes.size();
     const size_t sphere_shapes_size = sizeof(sphere_shape) * this->sphere_shapes.size();
     const size_t plane_shapes_size = sizeof(plane_shape) * this->plane_shapes.size();
@@ -22,6 +23,7 @@ std::vector<uint8_t> scene::to_bytes() const
     const size_t noise_textures_size = sizeof(noise_texture) * this->noise_textures.size();
 
     std::vector<uint8_t> bytes(sky_size
+        + infinite_shapes_size
         + shapes_size
         + sphere_shapes_size
         + plane_shapes_size
@@ -42,6 +44,7 @@ std::vector<uint8_t> scene::to_bytes() const
         current_position += size;
     };
     append_data(&this->sky, sky_size);
+    append_data(this->infinite_shapes.data(), infinite_shapes_size);
     append_data(this->shapes.data(), shapes_size);
     append_data(this->sphere_shapes.data(), sphere_shapes_size);
     append_data(this->plane_shapes.data(), plane_shapes_size);
@@ -62,6 +65,7 @@ size_t scene::size() const
 {
     const size_t sky_size = sizeof(texture);
 
+    const size_t infinite_shapes_size = sizeof(shape) * this->infinite_shapes.size();
     const size_t shapes_size = sizeof(shape) * this->shapes.size();
     const size_t sphere_shapes_size = sizeof(sphere_shape) * this->sphere_shapes.size();
     const size_t plane_shapes_size = sizeof(plane_shape) * this->plane_shapes.size();
@@ -78,6 +82,7 @@ size_t scene::size() const
     const size_t noise_textures_size = sizeof(noise_texture) * this->noise_textures.size();
 
     return sky_size
+        + infinite_shapes_size
         + shapes_size
         + sphere_shapes_size
         + plane_shapes_size
@@ -96,13 +101,12 @@ size_t scene::size() const
 
 shape scene::add_plane_shape(const plane_shape& in_plane, const material& in_material)
 {
-    this->shapes.push_back(shape{ shape_type::plane, this->plane_shapes.size(), in_material, in_plane.bounding_box() });
+    this->infinite_shapes.push_back(shape{ shape_type::plane, this->plane_shapes.size(), in_material, axis_aligned_box::zero() });
     this->plane_shapes.push_back(in_plane);
-    std::swap(this->shapes.back(), this->shapes[this->plane_shapes.size() - 1]); // Put all plane shapes at the start.
-    return this->shapes[this->plane_shapes.size() - 1];
+    return this->infinite_shapes.back();
 }
 
-shape scene::add_plane_shape(const plane& in_plane, const min_max<position_3d>& in_textured_area, const material& in_material)
+shape scene::add_plane_shape(const plane& in_plane, const min_max<position_3D>& in_textured_area, const material& in_material)
 {
     return this->add_plane_shape(plane_shape{ in_plane, in_textured_area }, in_material);
 }
@@ -114,7 +118,7 @@ shape scene::add_sphere_shape(const sphere_shape& in_sphere, const material& in_
     return this->shapes.back();
 }
 
-shape scene::add_sphere_shape(const sphere& in_sphere, const direction_3d& in_axial_tilt, const material& in_material)
+shape scene::add_sphere_shape(const sphere& in_sphere, const direction_3D& in_axial_tilt, const material& in_material)
 {
     return this->add_sphere_shape(sphere_shape{ in_sphere, in_axial_tilt }, in_material);
 }
@@ -126,16 +130,16 @@ shape scene::add_triangle_shape(const triangle_shape& in_triangle, const materia
     return this->shapes.back();
 }
 
-shape scene::add_triangle_shape(const triangle& in_triangle, const std::array<direction_3d, 3>& in_normals,
-    const std::array<uv_mapping, 3>& in_uv_mappings, const material& in_material)
+shape scene::add_triangle_shape(const triangle& in_triangle, const std::array<direction_3D, 3>& in_normals,
+    const std::array<UV_mapping, 3>& in_uv_mappings, const material& in_material)
 {
     return this->add_triangle_shape(triangle_shape{ in_triangle,
         in_normals[0], in_normals[1], in_normals[2],
         in_uv_mappings[0], in_uv_mappings[1], in_uv_mappings[2] }, in_material);
 }
 
-shape scene::add_triangle_shape(const triangle& in_triangle, const direction_3d& in_normal,
-    const std::array<uv_mapping, 3>& in_uv_mappings, const material& in_material)
+shape scene::add_triangle_shape(const triangle& in_triangle, const direction_3D& in_normal,
+    const std::array<UV_mapping, 3>& in_uv_mappings, const material& in_material)
 {
     return this->add_triangle_shape(triangle_shape{ in_triangle,
         in_normal, in_normal, in_normal,
@@ -218,8 +222,8 @@ texture scene::add_image_texture(const image_texture& in_texture)
     return texture{ texture_type::image, this->image_textures.size() - 1 };
 }
 
-texture scene::add_image_texture(const array_index in_index, const min_max<uv_mapping>& in_uv_mapping,
-    const extent_2d<uint32_t>& in_image_size, const image_texture::wrap_method in_wrap,
+texture scene::add_image_texture(const array_index in_index, const min_max<UV_mapping>& in_uv_mapping,
+    const extent_2D<uint32_t>& in_image_size, const image_texture::wrap_method in_wrap,
     const image_texture::filtering_method in_filtering)
 {
     return this->add_image_texture(image_texture{ in_index, in_uv_mapping, in_image_size, in_wrap, in_filtering });

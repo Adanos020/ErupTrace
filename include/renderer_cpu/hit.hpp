@@ -11,16 +11,16 @@
 struct hit_record
 {
     float distance;
-    position_3d point;
-    displacement_3d normal;
+    position_3D point;
+    displacement_3D normal;
     material mat;
-    uv_mapping texture_coord;
+    UV_mapping texture_coord;
     bool occurred = true;
 
     static hit_record nope()
     {
-        return hit_record{ 0.f, position_3d{ 0.f, 0.f, 0.f }, displacement_3d{ 0.f, 0.f, 0.f },
-            material{ material_type::none, 0 }, uv_mapping{ 0.f, 0.f }, false };
+        return hit_record{ 0.f, position_3D{ 0.f, 0.f, 0.f }, displacement_3D{ 0.f, 0.f, 0.f },
+            material{ material_type::none, 0 }, UV_mapping{ 0.f, 0.f }, false };
     }
 };
 

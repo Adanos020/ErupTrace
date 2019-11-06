@@ -36,8 +36,8 @@ struct constant_texture
 struct image_texture
 {
     array_index image_index;
-    min_max<uv_mapping> image_fragment;
-    extent_2d<uint32_t> image_size;
+    min_max<UV_mapping> image_fragment;
+    extent_2D<uint32_t> image_size;
 
     enum class wrap_method
     {

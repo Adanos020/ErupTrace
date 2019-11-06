@@ -1,5 +1,6 @@
 #pragma once
 
+#include <render_objects/hierarchy.hpp>
 #include <render_objects/materials.hpp>
 #include <render_objects/shapes.hpp>
 #include <render_objects/textures.hpp>
@@ -10,6 +11,9 @@ struct scene
 {
     texture sky;
 
+    bounding_interval_hierarchy hierarchy;
+
+    std::vector<shape> infinite_shapes;
     mutable std::vector<shape> shapes;
     std::vector<sphere_shape> sphere_shapes;
     std::vector<plane_shape> plane_shapes;
@@ -29,14 +33,12 @@ struct scene
     size_t size() const;
 
     shape add_plane_shape(const plane_shape&, const material&);
-    shape add_plane_shape(const plane&, const min_max<position_3d>& textured_area, const material&);
+    shape add_plane_shape(const plane&, const min_max<position_3D>& textured_area, const material&);
     shape add_sphere_shape(const sphere_shape&, const material&);
-    shape add_sphere_shape(const sphere&, const direction_3d& axial_tilt, const material&);
+    shape add_sphere_shape(const sphere&, const direction_3D& axial_tilt, const material&);
     shape add_triangle_shape(const triangle_shape&, const material&);
-    shape add_triangle_shape(const triangle&, const std::array<direction_3d, 3>& normals,
-        const std::array<uv_mapping, 3>&, const material&);
-    shape add_triangle_shape(const triangle&, const direction_3d& normal,
-        const std::array<uv_mapping, 3>&, const material&);
+    shape add_triangle_shape(const triangle&, const std::array<direction_3D, 3>& normals, const std::array<UV_mapping, 3>&, const material&);
+    shape add_triangle_shape(const triangle&, const direction_3D& normal, const std::array<UV_mapping, 3>&, const material&);
 
     material add_dielectric_material(const dielectric_material&);
     material add_dielectric_material(float refractive_index, const texture& albedo);
@@ -52,7 +54,7 @@ struct scene
     texture add_constant_texture(const constant_texture&);
     texture add_constant_texture(const color&);
     texture add_image_texture(const image_texture&);
-    texture add_image_texture(array_index, const min_max<uv_mapping>&, const extent_2d<uint32_t>&,
+    texture add_image_texture(array_index, const min_max<UV_mapping>&, const extent_2D<uint32_t>&,
         image_texture::wrap_method, image_texture::filtering_method);
     texture add_noise_texture(const noise_texture&);
     texture add_noise_texture(const transform_2d&, const color&);

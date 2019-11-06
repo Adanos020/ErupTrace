@@ -1,6 +1,5 @@
 #include <renderer_cpu/renderer_cpu.hpp>
 
-#include <render_objects/hierarchy.hpp>
 #include <render_objects/render_plan.hpp>
 #include <renderer_cpu/ray.hpp>
 #include <util/random.hpp>
@@ -16,8 +15,6 @@ renderer_cpu::renderer_cpu(const uint32_t sample_count, const uint32_t thread_co
 
 std::vector<rgba> renderer_cpu::render_scene(const render_plan& plan)
 {
-    bounding_interval_hierarchy hierarchy = make_hierarchy(plan.world.shapes, 1.f / 6.f);
-
     const uint32_t fragment_height = plan.image_size.height / this->thread_count;
 
     std::cout << "Starting jobs... ";
@@ -45,7 +42,7 @@ std::vector<rgba> renderer_cpu::render_scene(const render_plan& plan)
     return image;
 }
 
-std::vector<rgba> renderer_cpu::render_fragment(const render_plan* plan, const position_2d& top_left, const position_2d& bottom_right)
+std::vector<rgba> renderer_cpu::render_fragment(const render_plan* plan, const position_2D& top_left, const position_2D& bottom_right)
 {
     const uint32_t width = bottom_right.x - top_left.x;
     const uint32_t height = bottom_right.y - top_left.y;
@@ -63,7 +60,7 @@ std::vector<rgba> renderer_cpu::render_fragment(const render_plan* plan, const p
             color col{ 0.f };
             for (uint32_t s = 0; s < sample_count; ++s)
             {
-                const uv_mapping ray_direction = {
+                const UV_mapping ray_direction = {
                     float(x + random_uniform<float>()) * inverse_image_width,
                     float(plan->image_size.height - y + random_uniform<float>())* inverse_image_height,
                 };

@@ -11,17 +11,12 @@
 #include <algorithm>
 #include <utility>
 
-enum class axis_plane
-{
-    yz, xz, xy
-};
-
 struct line
 {
-    position_3d origin;
-    direction_3d direction;
+    position_3D origin;
+    direction_3D direction;
 
-    position_3d point_at_distance(const float t) const
+    position_3D point_at_distance(const float t) const
     {
         return origin + t * direction;
     }
@@ -29,14 +24,14 @@ struct line
 
 struct sphere
 {
-    position_3d origin;
+    position_3D origin;
     float radius;
 };
 
-inline static uv_mapping uv_on_sphere(const position_3d& in_normalized_p, const direction_3d& in_axial_tilt)
+inline static UV_mapping uv_on_sphere(const position_3D& in_normalized_p, const direction_3D& in_axial_tilt)
 {
-    const direction_3d tilted = in_normalized_p * glm::rotation(y_axis, in_axial_tilt);
-    return uv_mapping{
+    const direction_3D tilted = in_normalized_p * glm::rotation(y_axis, in_axial_tilt);
+    return UV_mapping{
         1.f - (glm::atan(tilted.z, tilted.x) + glm::pi<float>()) * glm::one_over_two_pi<float>(),
         (glm::asin(tilted.y) + glm::half_pi<float>()) * glm::one_over_pi<float>(),
     };
@@ -44,8 +39,8 @@ inline static uv_mapping uv_on_sphere(const position_3d& in_normalized_p, const 
 
 struct plane
 {
-    position_3d origin;
-    direction_3d front;
+    position_3D origin;
+    direction_3D front;
 
     plane inverse() const
     {
@@ -55,54 +50,61 @@ struct plane
 
 struct triangle
 {
-    position_3d a, b, c;
+    position_3D a, b, c;
 };
-
-template<axis_plane ax>
-struct plane_aligned_rectangle
-{
-    position_3d origin;
-    extent_2d<float> size;
-
-    static plane_aligned_rectangle<ax> square(const position_3d& in_origin, const float in_size)
-    {
-        return plane_aligned_rectangle<ax>{ in_origin, extent_2d<float>{ in_size, in_size } };
-    }
-};
-
-using yz_aligned_rectangle = plane_aligned_rectangle<axis_plane::yz>;
-using xz_aligned_rectangle = plane_aligned_rectangle<axis_plane::xz>;
-using xy_aligned_rectangle = plane_aligned_rectangle<axis_plane::xy>;
 
 struct axis_aligned_box
 {
-    position_3d min;
-    position_3d max;
+    position_3D min;
+    position_3D max;
+
+    float width() const
+    {
+        return max.x - min.x;
+    }
+
+    float height() const
+    {
+        return max.y - min.y;
+    }
+
+    float depth() const
+    {
+        return max.z - min.z;
+    }
+
+    extent_3D<float> size() const
+    {
+        return { this->width(), this->height(), this->depth() };
+    }
+
+    position_3D origin() const
+    {
+        return this->min + displacement_3D{ this->width() * 0.5f, this->height() * 0.5f, this->depth() * 0.5f };
+    }
 
     static axis_aligned_box zero()
     {
-        return axis_aligned_box{ position_3d{ 0.f }, position_3d{ 0.f } };
+        return axis_aligned_box{ position_3D{ 0.f }, position_3D{ 0.f } };
     }
 
-    static axis_aligned_box cuboid(const position_3d& in_origin, const extent_3d<float> in_half_size)
+    static axis_aligned_box cuboid(const position_3D& in_origin, const extent_3D<float> in_half_size)
     {
         return axis_aligned_box{
-            in_origin - glm::vec3{ in_half_size.width, in_half_size.height, in_half_size.depth },
-            in_origin + glm::vec3{ in_half_size.width, in_half_size.height, in_half_size.depth },
-        };
+            in_origin - displacement_3D{ in_half_size.width, in_half_size.height, in_half_size.depth },
+            in_origin + displacement_3D{ in_half_size.width, in_half_size.height, in_half_size.depth }, };
     }
 
     static axis_aligned_box cuboid(const line& in_diagonal, const float in_length)
     {
-        const position_3d a = in_diagonal.origin;
-        const position_3d b = in_diagonal.point_at_distance(in_length);
+        const position_3D a = in_diagonal.origin;
+        const position_3D b = in_diagonal.point_at_distance(in_length);
         return axis_aligned_box{
-            position_3d{ std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z) },
-            position_3d{ std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z) },
-        };
+            position_3D{ std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z) },
+            position_3D{ std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z) }, };
     }
 
-    static axis_aligned_box cube(const position_3d& in_origin, const float in_half_size)
+    static axis_aligned_box cube(const position_3D& in_origin, const float in_half_size)
     {
         return cuboid(in_origin, { in_half_size, in_half_size, in_half_size });
     }

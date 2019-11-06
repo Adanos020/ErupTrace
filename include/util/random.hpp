@@ -40,11 +40,11 @@ inline static color random_color()
     return color{ random_uniform<float>(), random_uniform<float>(), random_uniform<float>() };
 }
 
-inline static displacement_3d random_direction()
+inline static displacement_3D random_direction()
 {
     while (true)
     {
-        const displacement_3d dir = {
+        const displacement_3D dir = {
             random_uniform(-1.f, 1.f), random_uniform(-1.f, 1.f), random_uniform(-1.f, 1.f)
         };
         if (const float l = glm::length(dir); l * l < 1.f)
@@ -54,11 +54,11 @@ inline static displacement_3d random_direction()
     }
 }
 
-inline static displacement_3d random_in_unit_disk(const direction_3d& in_axis = z_axis)
+inline static displacement_3D random_in_unit_disk(const direction_3D& in_axis = z_axis)
 {
     while (true)
     {
-        if (const displacement_3d dir = (direction_3d{ 1.f } - in_axis) * random_direction(); glm::dot(dir, dir) < 1.f)
+        if (const displacement_3D dir = (direction_3D{ 1.f } - in_axis) * random_direction(); glm::dot(dir, dir) < 1.f)
         {
             return dir;
         }

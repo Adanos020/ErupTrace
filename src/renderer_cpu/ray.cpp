@@ -12,7 +12,7 @@
 // Rays
 
 ray::ray()
-    : line(line{ position_3d{ 0.f }, direction_3d{ 0.f } })
+    : line(line{ position_3D{ 0.f }, direction_3D{ 0.f } })
     , inverse_direction(0.f)
     , time(0.f)
 {
@@ -25,11 +25,11 @@ ray::ray(const line& l, const float time)
 {
 }
 
-ray ray::shoot(const camera& in_camera, const uv_mapping& in_direction)
+ray ray::shoot(const camera& in_camera, const UV_mapping& in_direction)
 {
-    const displacement_3d random_spot_on_lens = in_camera.lens_radius * random_in_unit_disk();
-    const displacement_3d offset = (in_camera.u * random_spot_on_lens.x) + (in_camera.v * random_spot_on_lens.y);
-    const position_3d origin = in_camera.origin + offset;
+    const displacement_3D random_spot_on_lens = in_camera.lens_radius * random_in_unit_disk();
+    const displacement_3D offset = (in_camera.u * random_spot_on_lens.x) + (in_camera.v * random_spot_on_lens.y);
+    const position_3D origin = in_camera.origin + offset;
 
     return ray{
         line { origin,
@@ -54,6 +54,5 @@ color ray::trace(const scene& in_scene, const int32_t depth) const
             return emitted;
         }
     }
-    return color_on_texture(in_scene, in_scene.sky, uv_on_sphere(glm::normalize(this->direction), y_axis),
-        this->origin + this->direction);
+    return color_on_texture(in_scene, in_scene.sky, uv_on_sphere(glm::normalize(this->direction), y_axis), this->origin + this->direction);
 }

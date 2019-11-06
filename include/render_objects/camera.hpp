@@ -5,9 +5,9 @@
 
 struct camera_create_info
 {
-    position_3d camera_position;
-    position_3d looking_at;
-    direction_3d up;
+    position_3D camera_position;
+    position_3D looking_at;
+    direction_3D up;
     float vertical_fov;
     float aspect_ratio;
     float aperture;
@@ -16,13 +16,13 @@ struct camera_create_info
 
 struct camera
 {
-    position_3d origin;
-    position_3d lower_left_corner;
-    position_3d horizontal;
-    position_3d vertical;
-    displacement_3d w;
-    displacement_3d u;
-    displacement_3d v;
+    position_3D origin;
+    position_3D lower_left_corner;
+    position_3D horizontal;
+    position_3D vertical;
+    displacement_3D w;
+    displacement_3D u;
+    displacement_3D v;
     float lens_radius;
     min_max<float> time;
 

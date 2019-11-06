@@ -42,17 +42,17 @@ struct from_to
     }
 };
 
-struct uv_mapping
+struct UV_mapping
 {
     float u;
     float v;
 
-    constexpr uv_mapping(const float u = 0.f, const float v = 0.f)
+    constexpr UV_mapping(const float u = 0.f, const float v = 0.f)
         : u(u), v(v)
     {
     }
 
-    constexpr uv_mapping(const std::pair<float, float>& pair)
+    constexpr UV_mapping(const std::pair<float, float>& pair)
         : u(pair.first), v(pair.second)
     {
     }
@@ -84,6 +84,12 @@ struct const_iterator_pair
 
     iterator begin;
     iterator end;
+
+    const_iterator_pair(const iterator_pair<T>& other)
+        : begin(static_cast<iterator>(other.begin))
+        , end(static_cast<iterator>(other.end))
+    {
+    }
 
     const_iterator_pair(iterator begin, iterator end)
         : begin(begin), end(end)

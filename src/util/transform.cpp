@@ -18,13 +18,13 @@ rotator& rotator::operator-=(const rotator& b)
     return *this;
 }
 
-transform_3d& transform_3d::move_to(const position_3d& position)
+transform_3d& transform_3d::move_to(const position_3D& position)
 {
     this->translation = position;
     return *this;
 }
 
-transform_3d& transform_3d::move_by(const displacement_3d& displacement)
+transform_3d& transform_3d::move_by(const displacement_3D& displacement)
 {
     this->translation += displacement;
     return *this;
@@ -68,13 +68,13 @@ transform_3d& transform_3d::rotate_by(const rotator& rotation)
 
 // 2D
 
-transform_2d& transform_2d::move_to(const position_2d& position)
+transform_2d& transform_2d::move_to(const position_2D& position)
 {
     this->translation = position;
     return *this;
 }
 
-transform_2d& transform_2d::move_by(const displacement_2d& displacement)
+transform_2d& transform_2d::move_by(const displacement_2D& displacement)
 {
     this->translation += displacement;
     return *this;

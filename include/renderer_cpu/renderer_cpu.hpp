@@ -13,7 +13,7 @@ public:
     std::vector<rgba> render_scene(const struct render_plan&);
 
 private:
-    std::vector<rgba> render_fragment(const struct render_plan*, const position_2d& top_left, const position_2d& bottom_right);
+    std::vector<rgba> render_fragment(const struct render_plan*, const position_2D& top_left, const position_2D& bottom_right);
 
 private:
     const uint32_t sample_count;

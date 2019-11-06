@@ -29,12 +29,12 @@ inline static rotator operator-(const rotator& a)
 
 struct transform_3d
 {
-    position_3d translation = { 0.f, 0.f, 0.f };
+    position_3D translation = { 0.f, 0.f, 0.f };
     glm::vec3 scale = { 1.f, 1.f, 1.f };
     rotator rotation = { 0.f, 0.f, 0.f };
 
-    transform_3d& move_to(const position_3d&);
-    transform_3d& move_by(const displacement_3d&);
+    transform_3d& move_to(const position_3D&);
+    transform_3d& move_by(const displacement_3D&);
     transform_3d& scale_to(const glm::vec3&);
     transform_3d& scale_to(float scalar);
     transform_3d& scale_by(const glm::vec3&);
@@ -45,12 +45,12 @@ struct transform_3d
 
 struct transform_2d
 {
-    position_2d translation = { 0.f, 0.f };
+    position_2D translation = { 0.f, 0.f };
     glm::vec2 scale = { 1.f, 1.f };
     float rotation = 0.f;
 
-    transform_2d& move_to(const position_2d&);
-    transform_2d& move_by(const displacement_2d&);
+    transform_2d& move_to(const position_2D&);
+    transform_2d& move_by(const displacement_2D&);
     transform_2d& scale_to(const glm::vec2&);
     transform_2d& scale_to(float scalar);
     transform_2d& scale_by(const glm::vec2&);

@@ -3,12 +3,12 @@
 #include <type_traits>
 
 template <typename T>
-struct extent_2d
+struct extent_2D
 {
     static_assert(std::is_arithmetic_v<T>);
 
-    constexpr extent_2d() = default;
-    constexpr extent_2d(const T width, const T height)
+    constexpr extent_2D() = default;
+    constexpr extent_2D(const T width, const T height)
         : width(width), height(height)
     {
     }
@@ -23,12 +23,12 @@ struct extent_2d
 };
 
 template <typename T>
-struct extent_3d
+struct extent_3D
 {
     static_assert(std::is_arithmetic_v<T>);
 
-    constexpr extent_3d() = default;
-    constexpr extent_3d(const T width, const T height, const T depth)
+    constexpr extent_3D() = default;
+    constexpr extent_3D(const T width, const T height, const T depth)
         : width(width), height(height), depth(depth)
     {
     }
