@@ -104,42 +104,45 @@ hit_record ray_hits_anything(const scene& in_scene, const ray& in_ray)
         }
     }
 
-    std::stack<BIH_node> node_stack;
-    node_stack.push(in_scene.hierarchy.front());
-    while (!node_stack.empty())
+    if (!in_scene.hierarchy.empty())
     {
-        BIH_node current_node = node_stack.top();
-        node_stack.pop();
-
-        bool leaf_hit = true;
-        while (current_node.type != BIH_node::node_type::leaf)
+        std::stack<BIH_node> node_stack;
+        node_stack.push(in_scene.hierarchy.front());
+        while (!node_stack.empty())
         {
-            const auto [left_hit, right_hit] = line_intersects_children_of(in_ray, current_node);
-            if (left_hit)
+            BIH_node current_node = node_stack.top();
+            node_stack.pop();
+
+            bool leaf_hit = true;
+            while (current_node.type != BIH_node::node_type::leaf)
             {
-                current_node = in_scene.hierarchy[current_node.children.left];
-                if (right_hit)
+                const auto [left_hit, right_hit] = line_intersects_children_of(in_ray, current_node, { 0.0001f, closest_hit.distance });
+                if (left_hit)
                 {
-                    node_stack.push(in_scene.hierarchy[current_node.children.right]);
+                    current_node = in_scene.hierarchy[current_node.children.left];
+                    if (right_hit)
+                    {
+                        node_stack.push(in_scene.hierarchy[current_node.children.right]);
+                    }
+                }
+                else if (right_hit)
+                {
+                    current_node = in_scene.hierarchy[current_node.children.right];
+                }
+                else
+                {
+                    leaf_hit = false;
+                    break;
                 }
             }
-            else if (right_hit)
-            {
-                current_node = in_scene.hierarchy[current_node.children.right];
-            }
-            else
-            {
-                leaf_hit = false;
-                break;
-            }
-        }
 
-        if (leaf_hit)
-        {
-            const shape& it_shape = in_scene.shapes[current_node.shape_index];
-            if (const hit_record hit = ray_hits(in_scene, it_shape, in_ray, { 0.0001f, closest_hit.distance }); hit.occurred)
+            if (leaf_hit)
             {
-                closest_hit = hit;
+                const shape& it_shape = in_scene.shapes[current_node.shape_index];
+                if (const hit_record hit = ray_hits(in_scene, it_shape, in_ray, { 0.0001f, closest_hit.distance }); hit.occurred)
+                {
+                    closest_hit = hit;
+                }
             }
         }
     }

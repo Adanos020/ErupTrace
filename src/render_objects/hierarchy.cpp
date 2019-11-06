@@ -18,11 +18,11 @@
 
 // Construction
 
-static axis_aligned_box calculate_bounds(const const_iterator_pair<std::vector<shape>>& in_shapes)
+static axis_aligned_box calculate_bounds(const std::vector<shape>& in_shapes)
 {
-    axis_aligned_box scene_bounds = in_shapes.begin->bounding_box;
+    axis_aligned_box scene_bounds = in_shapes.front().bounding_box;
 
-    std::for_each(std::next(in_shapes.begin), in_shapes.end, [&](const shape& s)
+    std::for_each(std::next(in_shapes.cbegin()), in_shapes.cend(), [&](const shape& s)
     {
         scene_bounds.min.x = std::min(s.bounding_box.min.x, scene_bounds.min.x);
         scene_bounds.min.y = std::min(s.bounding_box.min.y, scene_bounds.min.y);
@@ -35,11 +35,16 @@ static axis_aligned_box calculate_bounds(const const_iterator_pair<std::vector<s
     return scene_bounds;
 }
 
-template<BIH_node::node_type component>
-static void split(const iterator_pair<std::vector<shape>>& in_shapes, const float in_split_plane,
-    const array_index in_current, bounding_interval_hierarchy& out_hierarchy, std::vector<shape>::iterator& out_middle,
-    axis_aligned_box& out_left_box, axis_aligned_box& out_right_box)
-{
+template<BIH_node_type component>
+static void split(
+    const iterator_pair<std::vector<shape>>& in_shapes,
+    const float in_split_plane,
+    const array_index in_current,
+    bounding_interval_hierarchy& out_hierarchy,
+    std::vector<shape>::iterator& out_middle,
+    axis_aligned_box& out_left_box,
+    axis_aligned_box& out_right_box
+) {
     out_hierarchy[in_current].type = component;
     constexpr uint32_t comp = uint32_t(component);
 
@@ -84,12 +89,16 @@ static void split(const iterator_pair<std::vector<shape>>& in_shapes, const floa
     out_right_box.min[comp] = out_hierarchy[in_current].clip.right;
 }
 
-static void make_hierarchy(const iterator_pair<std::vector<shape>>& in_shapes, std::vector<shape>& in_shapes_container,
-    bounding_interval_hierarchy& out_hierarchy, const axis_aligned_box& in_node_bounds, const array_index in_current)
-{
+static void make_hierarchy(
+    const iterator_pair<std::vector<shape>>& in_shapes,
+    std::vector<shape>& in_shapes_container,
+    const axis_aligned_box& in_node_bounds,
+    const array_index in_current,
+    bounding_interval_hierarchy& out_hierarchy
+) {
     if (std::distance(in_shapes.begin, in_shapes.end) == 1)
     {
-        out_hierarchy[in_current].type = BIH_node::node_type::leaf;
+        out_hierarchy[in_current].type = BIH_node_type::leaf;
         out_hierarchy[in_current].shape_index = std::distance(in_shapes_container.begin(), in_shapes.begin);
     }
     else
@@ -102,15 +111,15 @@ static void make_hierarchy(const iterator_pair<std::vector<shape>>& in_shapes, s
         const position_3D box_center = in_node_bounds.origin();
         if (box_size.width > box_size.height && box_size.width > box_size.depth)
         {
-            split<BIH_node::node_type::x>(in_shapes, box_center.x, in_current, out_hierarchy, middle, left_box, right_box);
+            split<BIH_node_type::x>(in_shapes, box_center.x, in_current, out_hierarchy, middle, left_box, right_box);
         }
         else if (box_size.height > box_size.depth)
         {
-            split<BIH_node::node_type::y>(in_shapes, box_center.y, in_current, out_hierarchy, middle, left_box, right_box);
+            split<BIH_node_type::y>(in_shapes, box_center.y, in_current, out_hierarchy, middle, left_box, right_box);
         }
         else
         {
-            split<BIH_node::node_type::z>(in_shapes, box_center.z, in_current, out_hierarchy, middle, left_box, right_box);
+            split<BIH_node_type::z>(in_shapes, box_center.z, in_current, out_hierarchy, middle, left_box, right_box);
         }
 
         if (in_shapes.begin != middle)
@@ -118,14 +127,14 @@ static void make_hierarchy(const iterator_pair<std::vector<shape>>& in_shapes, s
             const uint32_t left_index = out_hierarchy.size();
             out_hierarchy[in_current].children.left = left_index;
             out_hierarchy.push_back(BIH_node{});
-            make_hierarchy({ in_shapes.begin, middle }, in_shapes_container, out_hierarchy, left_box, left_index);
+            make_hierarchy({ in_shapes.begin, middle }, in_shapes_container, left_box, left_index, out_hierarchy);
         }
         if (in_shapes.end != middle)
         {
             const uint32_t right_index = out_hierarchy.size();
             out_hierarchy[in_current].children.left = right_index;
             out_hierarchy.push_back(BIH_node{});
-            make_hierarchy({ middle, in_shapes.end }, in_shapes_container, out_hierarchy, right_box, right_index);
+            make_hierarchy({ middle, in_shapes.end }, in_shapes_container, right_box, right_index, out_hierarchy);
         }
     }
 }
@@ -135,13 +144,13 @@ bounding_interval_hierarchy make_hierarchy(std::vector<shape>& in_shapes)
     if (in_shapes.empty()) { return {}; }
 
     bounding_interval_hierarchy hierarchy{ BIH_node{} };
-    make_hierarchy(iterator_pair{ in_shapes }, in_shapes, hierarchy, calculate_bounds(in_shapes), 0);
+    make_hierarchy(iterator_pair{ in_shapes }, in_shapes, calculate_bounds(in_shapes), 0, hierarchy);
     return hierarchy;
 }
 
 // Intersection
 
-std::pair<bool, bool> line_intersects_children_of(const struct line& in_line, const BIH_node& in_node)
+std::pair<bool, bool> line_intersects_children_of(const struct line& in_line, const BIH_node& in_node, const min_max<float>& in_distance)
 {
     return { false, false };
 }

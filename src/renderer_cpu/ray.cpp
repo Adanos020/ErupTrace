@@ -18,10 +18,10 @@ ray::ray()
 {
 }
 
-ray::ray(const line& l, const float time)
-    : line(l)
-    , inverse_direction(1.f / l.direction)
-    , time(time)
+ray::ray(const line& in_line, const float in_time)
+    : line(in_line)
+    , inverse_direction(1.f / in_line.direction)
+    , time(in_time)
 {
 }
 
