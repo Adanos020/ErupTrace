@@ -35,8 +35,8 @@ static axis_aligned_box calculate_bounds(const std::vector<shape>& in_shapes)
     return scene_bounds;
 }
 
-template<BIH_node_type split_axis>
 static void split(
+    const BIH_node_type in_split_axis,
     const iterator_pair<std::vector<shape>>& in_shapes,
     const float in_split_plane,
     const array_index in_current,
@@ -45,17 +45,17 @@ static void split(
     axis_aligned_box& out_left_box,
     axis_aligned_box& out_right_box
 ) {
-    out_nodes[in_current].type = split_axis;
-    constexpr uint32_t axis = uint32_t(split_axis);
+    out_nodes[in_current].type = in_split_axis;
+    const uint32_t axis = uint32_t(in_split_axis);
 
-    out_middle = std::partition(in_shapes.begin, in_shapes.end, [in_split_plane](const shape& a)
+    out_middle = std::partition(in_shapes.begin, in_shapes.end, [in_split_plane, axis](const shape& a)
         { return a.bounding_box.origin()[axis] < in_split_plane; });
 
     if (out_middle != in_shapes.begin)
     {
-        const auto compare_max = [](const shape& a, const shape& b) { return a.bounding_box.max[axis] < b.bounding_box.max[axis]; };
+        const auto compare_max = [axis](const shape& a, const shape& b) { return a.bounding_box.max[axis] < b.bounding_box.max[axis]; };
         const std::vector<shape>::iterator max_left = std::max_element(in_shapes.begin, out_middle, compare_max);
-        out_nodes[in_current].clip.left = max_left->bounding_box.max[axis];
+        out_left_box.max[axis] = out_nodes[in_current].clip.left = max_left->bounding_box.max[axis];
     }
     else
     {
@@ -65,18 +65,29 @@ static void split(
 
     if (out_middle != in_shapes.end)
     {
-        const auto compare_min = [](const shape& a, const shape& b) { return a.bounding_box.min[axis] < b.bounding_box.min[axis]; };
+        const auto compare_min = [axis](const shape& a, const shape& b) { return a.bounding_box.min[axis] < b.bounding_box.min[axis]; };
         const std::vector<shape>::iterator min_right = std::min_element(out_middle, in_shapes.end, compare_min);
-        out_nodes[in_current].clip.right = min_right->bounding_box.min[axis];
+        out_right_box.min[axis] = out_nodes[in_current].clip.right = min_right->bounding_box.min[axis];
     }
     else
     {
         out_middle = std::prev(in_shapes.end);
         out_nodes[in_current].clip.right = infinity;
     }
+}
 
-    out_left_box.max[axis] = out_nodes[in_current].clip.left;
-    out_right_box.min[axis] = out_nodes[in_current].clip.right;
+static BIH_node_type choose_split_axis(const axis_aligned_box& in_box)
+{
+    const extent_3D<float> box_size = in_box.size();
+    if (box_size.width > box_size.height && box_size.width > box_size.depth)
+    {
+        return BIH_node_type::x;
+    }
+    if (box_size.height > box_size.depth)
+    {
+        return BIH_node_type::y;
+    }
+    return BIH_node_type::z;
 }
 
 static void make_hierarchy(
@@ -86,10 +97,13 @@ static void make_hierarchy(
     const array_index in_current,
     std::vector<BIH_node>& out_nodes
 ) {
-    if (std::distance(in_shapes.begin, in_shapes.end) == 1)
+    if (const ptrdiff_t size = std::distance(in_shapes.begin, in_shapes.end); size < 2)
     {
-        out_nodes[in_current].type = BIH_node_type::leaf;
-        out_nodes[in_current].shape_index = std::distance(in_shapes_container.begin(), in_shapes.begin);
+        if (size == 1)
+        {
+            out_nodes[in_current].type = BIH_node_type::leaf;
+            out_nodes[in_current].shape_index = std::distance(in_shapes_container.begin(), in_shapes.begin);
+        }
     }
     else
     {
@@ -97,29 +111,20 @@ static void make_hierarchy(
         axis_aligned_box left_box = in_node_bounds;
         axis_aligned_box right_box = in_node_bounds;
 
-        const extent_3D<float> box_size = in_node_bounds.size();
         const position_3D box_center = in_node_bounds.origin();
-        if (box_size.width > box_size.height && box_size.width > box_size.depth)
-        {
-            split<BIH_node_type::x>(in_shapes, box_center.x, in_current, out_nodes, middle, left_box, right_box);
-        }
-        else if (box_size.height > box_size.depth)
-        {
-            split<BIH_node_type::y>(in_shapes, box_center.y, in_current, out_nodes, middle, left_box, right_box);
-        }
-        else
-        {
-            split<BIH_node_type::z>(in_shapes, box_center.z, in_current, out_nodes, middle, left_box, right_box);
-        }
+        const BIH_node_type split_axis = choose_split_axis(in_node_bounds);
+        const uint32_t axis = uint32_t(split_axis);
+        split(split_axis, in_shapes, box_center[axis], in_current, out_nodes, middle, left_box, right_box);
 
-        if (middle != in_shapes.begin)
+        if (std::isfinite(out_nodes[in_current].clip.left))
         {
             const uint32_t left_index = out_nodes.size();
             out_nodes[in_current].children.left = left_index;
             out_nodes.push_back(BIH_node{});
             make_hierarchy({ in_shapes.begin, middle }, in_shapes_container, left_box, left_index, out_nodes);
         }
-        if (middle != in_shapes.end)
+
+        if (std::isfinite(out_nodes[in_current].clip.right))
         {
             const uint32_t right_index = out_nodes.size();
             out_nodes[in_current].children.right = right_index;
