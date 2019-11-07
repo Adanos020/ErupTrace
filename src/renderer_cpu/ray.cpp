@@ -33,8 +33,8 @@ ray ray::shoot(const camera& in_camera, const UV_mapping& in_direction)
 
     return ray{
         line { origin,
-            in_camera.lower_left_corner + (in_direction.u * in_camera.horizontal)
-                + (in_direction.v * in_camera.vertical) - origin,
+            glm::normalize(in_camera.lower_left_corner + (in_direction.u * in_camera.horizontal)
+                + (in_direction.v * in_camera.vertical) - origin),
         },
         random_uniform(in_camera.time.min, in_camera.time.max),
     };

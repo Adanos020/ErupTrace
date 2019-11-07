@@ -8,6 +8,12 @@
 #include <iostream>
 #include <string>
 
+#ifdef NDEBUG
+#   define THREAD_COUNT 20
+#else
+#   define THREAD_COUNT 1
+#endif
+
 using namespace std::string_literals;
 
 void export_image(const std::vector<rgba>& image, const extent_2D<uint32_t> image_size, const std::string_view path)
@@ -42,7 +48,7 @@ int main()
     {
         const extent_2D<uint32_t> image_size = { 1600, 900 };
         const render_plan plan = render_plan::test_scene(image_size);
-        const std::vector<rgba> image = renderer_cpu{ 500, 20 }.render_scene(plan);
+        const std::vector<rgba> image = renderer_cpu{ 500, THREAD_COUNT }.render_scene(plan);
         export_image(image, image_size, "test.png");
     }
     catch (const std::exception& e)

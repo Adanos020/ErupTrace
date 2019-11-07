@@ -20,7 +20,10 @@ struct BIH_node
     };
 };
 
-using bounding_interval_hierarchy = std::vector<BIH_node>;
+struct bounding_interval_hierarchy
+{
+    axis_aligned_box bounding_box;
+    std::vector<BIH_node> nodes;
+};
 
 bounding_interval_hierarchy make_hierarchy(std::vector<shape>& in_shapes);
-std::pair<bool, bool> line_intersects_children_of(const struct line&, const BIH_node&, const min_max<float>& distance);
