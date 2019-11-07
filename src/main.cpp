@@ -10,12 +10,11 @@
 
 using namespace std::string_literals;
 
-void export_image(const std::vector<rgba>& image, const extent_2D<uint32_t> image_size,
-    const std::string_view path)
+void export_image(const std::vector<rgba>& image, const extent_2D<uint32_t> image_size, const std::string_view path)
 {
     std::cout << "Writing to file... ";
 
-    static const uint32_t channels = 4;
+    constexpr uint32_t channels = 4;
     if (string_ends_with(path, ".png"))
     {
         stbi_write_png(path.data(), image_size.width, image_size.height, channels,
@@ -23,7 +22,7 @@ void export_image(const std::vector<rgba>& image, const extent_2D<uint32_t> imag
     }
     else if (string_ends_with(path, ".jpg"))
     {
-        static const int32_t quality = 100;
+        constexpr int32_t quality = 100;
         stbi_write_jpg(path.data(), image_size.width, image_size.height, channels,
             image.data(), quality);
     }

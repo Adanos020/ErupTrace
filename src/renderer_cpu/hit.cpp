@@ -114,7 +114,7 @@ hit_record ray_hits_anything(const scene& in_scene, const ray& in_ray)
             node_stack.pop();
 
             bool leaf_hit = true;
-            while (current_node.type != BIH_node::node_type::leaf)
+            while (current_node.type != BIH_node_type::leaf)
             {
                 const auto [left_hit, right_hit] = line_intersects_children_of(in_ray, current_node, { 0.0001f, closest_hit.distance });
                 if (left_hit)

@@ -35,7 +35,7 @@ static axis_aligned_box calculate_bounds(const std::vector<shape>& in_shapes)
     return scene_bounds;
 }
 
-template<BIH_node_type component>
+template<BIH_node_type split_axis>
 static void split(
     const iterator_pair<std::vector<shape>>& in_shapes,
     const float in_split_plane,
@@ -45,26 +45,26 @@ static void split(
     axis_aligned_box& out_left_box,
     axis_aligned_box& out_right_box
 ) {
-    out_hierarchy[in_current].type = component;
-    constexpr uint32_t comp = uint32_t(component);
+    out_hierarchy[in_current].type = split_axis;
+    constexpr uint32_t axis = uint32_t(split_axis);
 
     if (std::distance(in_shapes.begin, in_shapes.end) == 2 &&
         in_shapes.begin->bounding_box.origin() == std::next(in_shapes.begin)->bounding_box.origin())
     {
         out_middle = std::next(in_shapes.begin);
-        out_hierarchy[in_current].clip.left = in_shapes.begin->bounding_box.max[comp];
-        out_hierarchy[in_current].clip.right = out_middle->bounding_box.min[comp];
+        out_hierarchy[in_current].clip.left = in_shapes.begin->bounding_box.max[axis];
+        out_hierarchy[in_current].clip.right = out_middle->bounding_box.min[axis];
     }
     else
     {
         out_middle = std::partition(in_shapes.begin, in_shapes.end, [in_split_plane](const shape& a)
-            { return a.bounding_box.origin()[comp] < in_split_plane; });
+            { return a.bounding_box.origin()[axis] < in_split_plane; });
 
         if (out_middle != in_shapes.begin)
         {
-            const auto compare_max = [](const shape& a, const shape& b) { return a.bounding_box.max[comp] < b.bounding_box.max[comp]; };
+            const auto compare_max = [](const shape& a, const shape& b) { return a.bounding_box.max[axis] < b.bounding_box.max[axis]; };
             const std::vector<shape>::iterator max_left = std::max_element(in_shapes.begin, out_middle, compare_max);
-            out_hierarchy[in_current].clip.left = max_left->bounding_box.max[comp];
+            out_hierarchy[in_current].clip.left = max_left->bounding_box.max[axis];
         }
         else
         {
@@ -74,9 +74,9 @@ static void split(
 
         if (out_middle != in_shapes.end)
         {
-            const auto compare_min = [](const shape& a, const shape& b) { return a.bounding_box.min[comp] < b.bounding_box.min[comp]; };
+            const auto compare_min = [](const shape& a, const shape& b) { return a.bounding_box.min[axis] < b.bounding_box.min[axis]; };
             const std::vector<shape>::iterator min_right = std::min_element(out_middle, in_shapes.end, compare_min);
-            out_hierarchy[in_current].clip.right = min_right->bounding_box.min[comp];
+            out_hierarchy[in_current].clip.right = min_right->bounding_box.min[axis];
         }
         else
         {
@@ -85,8 +85,8 @@ static void split(
         }
     }
 
-    out_left_box.max[comp] = out_hierarchy[in_current].clip.left;
-    out_right_box.min[comp] = out_hierarchy[in_current].clip.right;
+    out_left_box.max[axis] = out_hierarchy[in_current].clip.left;
+    out_right_box.min[axis] = out_hierarchy[in_current].clip.right;
 }
 
 static void make_hierarchy(

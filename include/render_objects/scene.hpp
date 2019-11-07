@@ -14,7 +14,7 @@ struct scene
     bounding_interval_hierarchy hierarchy;
 
     std::vector<shape> infinite_shapes;
-    mutable std::vector<shape> shapes;
+    std::vector<shape> shapes;
     std::vector<sphere_shape> sphere_shapes;
     std::vector<plane_shape> plane_shapes;
     std::vector<triangle_shape> triangle_shapes;
