@@ -6,8 +6,7 @@ std::vector<uint8_t> scene::to_bytes() const
 {
     const size_t sky_size = sizeof(texture);
 
-    const size_t hierarchy_box_size = sizeof(axis_aligned_box);
-    const size_t hierarchy_nodes_size = sizeof(BIH_node) * this->hierarchy.nodes.size();
+    const size_t hierarchy_size = sizeof(BIH_node) * this->hierarchy.size();
 
     const size_t infinite_shapes_size = sizeof(shape) * this->infinite_shapes.size();
     const size_t shapes_size = sizeof(shape) * this->shapes.size();
@@ -26,8 +25,7 @@ std::vector<uint8_t> scene::to_bytes() const
     const size_t noise_textures_size = sizeof(noise_texture) * this->noise_textures.size();
 
     std::vector<uint8_t> bytes(sky_size
-        + hierarchy_box_size
-        + hierarchy_nodes_size
+        + hierarchy_size
         + infinite_shapes_size
         + shapes_size
         + sphere_shapes_size
@@ -49,8 +47,7 @@ std::vector<uint8_t> scene::to_bytes() const
         current_position += size;
     };
     append_data(&this->sky, sky_size);
-    append_data(&this->hierarchy.bounding_box, hierarchy_box_size);
-    append_data(this->hierarchy.nodes.data(), hierarchy_nodes_size);
+    append_data(this->hierarchy.data(), hierarchy_size);
     append_data(this->infinite_shapes.data(), infinite_shapes_size);
     append_data(this->shapes.data(), shapes_size);
     append_data(this->sphere_shapes.data(), sphere_shapes_size);
@@ -72,8 +69,7 @@ size_t scene::size() const
 {
     const size_t sky_size = sizeof(texture);
 
-    const size_t hierarchy_box_size = sizeof(axis_aligned_box);
-    const size_t hierarchy_nodes_size = sizeof(BIH_node) * this->hierarchy.nodes.size();
+    const size_t hierarchy_size = sizeof(BIH_node) * this->hierarchy.size();
 
     const size_t infinite_shapes_size = sizeof(shape) * this->infinite_shapes.size();
     const size_t shapes_size = sizeof(shape) * this->shapes.size();
@@ -92,8 +88,7 @@ size_t scene::size() const
     const size_t noise_textures_size = sizeof(noise_texture) * this->noise_textures.size();
 
     return sky_size
-        + hierarchy_box_size
-        + hierarchy_nodes_size
+        + hierarchy_size
         + infinite_shapes_size
         + shapes_size
         + sphere_shapes_size

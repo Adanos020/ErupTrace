@@ -15,17 +15,12 @@ render_plan render_plan::test_scene(const extent_2D<uint32_t>& image_size)
     scene world;
     world.sky = world.add_constant_texture(color{ 0.125f, 0.175f, 0.25f });
 
+    // floor
     world.add_plane_shape(plane{ position_3D{ 0.f, -0.2f, 0.f }, y_axis }, {},
         world.add_diffuse_material(
             world.add_constant_texture({ color{ 0.7f, 1.f, 0.3f } })));
 
-    world.add_sphere_shape(sphere{ position_3D{ -0.2f, 0.f, 0.f }, 0.2f }, glm::normalize(displacement_3D{ 1.f, 1.f, -1.f }),
-        world.add_diffuse_material(
-            world.add_checker_texture(transform_2d{}.scale_to(30.f), color{ 0.5f, 0.7f, 1.f }, color{ 1.f, 0.3f, 0.5f })));
-    world.add_sphere_shape(sphere{ position_3D{ 0.2f, 0.f, 0.f }, 0.2f }, y_axis,
-        world.add_dielectric_material(1.5f,
-            world.add_constant_texture(color{ 0.7f, 0.7f, 1.f })));
-
+    // walls
     const material mirror_material = world.add_reflect_material(0.01f, world.add_constant_texture(color{ 0.8f, 0.8f, 0.8f }));
     world.add_triangle_shape(triangle{
         position_3D{ -1.f, -0.2f, 0.5f },
@@ -45,6 +40,14 @@ render_plan render_plan::test_scene(const extent_2D<uint32_t>& image_size)
         position_3D{ -1.f,  0.5f,  0.5f },
         position_3D{ -1.f,  0.5f, -0.5f },
         position_3D{ -1.f, -0.2f, -0.5f }, }, x_axis, {}, light_material);
+
+    // balls
+    world.add_sphere_shape(sphere{ position_3D{ -0.2f, 0.f, 0.f }, 0.2f }, glm::normalize(displacement_3D{ 1.f, 1.f, -1.f }),
+        world.add_diffuse_material(
+            world.add_checker_texture(transform_2d{}.scale_to(30.f), color{ 0.5f, 0.7f, 1.f }, color{ 1.f, 0.3f, 0.5f })));
+    world.add_sphere_shape(sphere{ position_3D{ 0.2f, 0.f, 0.f }, 0.2f }, y_axis,
+        world.add_dielectric_material(1.5f,
+            world.add_constant_texture(color{ 0.7f, 0.7f, 1.f })));
 
     world.add_sphere_shape(sphere{ position_3D{ -0.2f, 0.5f, 0.2f }, 0.2f }, y_axis,
         world.add_emit_light_material(world.add_constant_texture(color{ 1.f, 1.f, 0.5f })));

@@ -52,13 +52,10 @@ struct triangle_shape : triangle
             position_3D{
                 std::min(std::min(this->a.x, this->b.x), this->c.x),
                 std::min(std::min(this->a.y, this->b.y), this->c.y),
-                std::min(std::min(this->a.z, this->b.z), this->c.z),
-            },
+                std::min(std::min(this->a.z, this->b.z), this->c.z), },
             position_3D{
                 std::max(std::max(this->a.x, this->b.x), this->c.x),
                 std::max(std::max(this->a.y, this->b.y), this->c.y),
-                std::max(std::max(this->a.z, this->b.z), this->c.z),
-            },
-        };
+                std::max(std::max(this->a.z, this->b.z), this->c.z), }, };
     }
 };

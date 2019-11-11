@@ -18,10 +18,10 @@ static constexpr color cyan = color{ 0.f, 1.f, 1.f };
 
 inline static rgb to_rgb(const color& in_col)
 {
-    return in_col * 255.99f;
+    return glm::clamp(in_col * 255.99f, 0.f, 255.f);
 }
 
 inline static rgba to_rgba(const color_alpha& in_col)
 {
-    return in_col * 255.99f;
+    return glm::clamp(in_col * 255.99f, 0.f, 255.f);
 }
