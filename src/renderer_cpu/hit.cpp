@@ -105,35 +105,36 @@ static auto ray_hits_children_of(const ray& in_ray, const BIH_node& in_node, con
     struct
     {
         bool occurred = false;
+        bool left;
         min_max<float> distances;
-    } hit_left, hit_right;
+    } hit_first, hit_second;
 
     if (distances_to_splitting_planes[first] > in_distances.min)
     {
-        auto& hit = first == 0 ? hit_left : hit_right;
-        hit.occurred = true;
-        hit.distances = {
+        hit_first.occurred = true;
+        hit_first.left = first == 0;
+        hit_first.distances = {
             in_distances.min,
             std::min(in_distances.max, distances_to_splitting_planes[first]),
         };
     }
     if (distances_to_splitting_planes[second] < in_distances.max)
     {
-        auto& hit = first == 0 ? hit_right : hit_left;
-        hit.occurred = true;
-        hit.distances = {
+        hit_second.occurred = true;
+        hit_second.left = second == 0;
+        hit_second.distances = {
             std::max(in_distances.min, distances_to_splitting_planes[second]),
             in_distances.max,
         };
     }
 
-    return std::make_pair(hit_left, hit_right);
+    return std::make_pair(hit_first, hit_second);
 }
 
 hit_record ray_hits_anything(const scene& in_scene, const ray& in_ray)
 {
     hit_record closest_hit = hit_record::nope();
-    min_max<float> distances = { 0.0001f, FLT_MAX };
+    min_max<float> distances = { 0.0001f, infinity };
 
     for (const shape& it_shape : in_scene.infinite_shapes)
     {
@@ -145,12 +146,7 @@ hit_record ray_hits_anything(const scene& in_scene, const ray& in_ray)
 
     if (!in_scene.hierarchy.empty())
     {
-        struct stack_entry
-        {
-            BIH_node node;
-            min_max<float> distances;
-        };
-
+        struct stack_entry { BIH_node node; min_max<float> distances; };
         std::stack<stack_entry> node_stack;
         node_stack.push({ in_scene.hierarchy.front(), distances });
         while (!node_stack.empty())
@@ -160,18 +156,21 @@ hit_record ray_hits_anything(const scene& in_scene, const ray& in_ray)
             bool leaf_hit = true;
             while (current_entry.node.type != BIH_node_type::leaf)
             {
-                const auto [hit_left, hit_right] = ray_hits_children_of(in_ray, current_entry.node, current_entry.distances);
-                if (hit_left.occurred)
+                const auto [hit_first, hit_second] = ray_hits_children_of(in_ray, current_entry.node, current_entry.distances);
+                const auto [first_node, second_node] = hit_first.left
+                    ? std::make_pair(current_entry.node.children.left, current_entry.node.children.right)
+                    : std::make_pair(current_entry.node.children.right, current_entry.node.children.left);
+                if (hit_first.occurred)
                 {
-                    current_entry = { in_scene.hierarchy[current_entry.node.children.left], hit_left.distances };
-                    if (hit_right.occurred)
+                    current_entry = { in_scene.hierarchy[first_node], hit_first.distances };
+                    if (hit_second.occurred)
                     {
-                        node_stack.push({ in_scene.hierarchy[current_entry.node.children.right], hit_right.distances });
+                        node_stack.push({ in_scene.hierarchy[second_node], hit_second.distances });
                     }
                 }
-                else if (hit_right.occurred)
+                else if (hit_second.occurred)
                 {
-                    current_entry = { in_scene.hierarchy[current_entry.node.children.right], hit_right.distances };
+                    current_entry = { in_scene.hierarchy[second_node], hit_second.distances };
                 }
                 else
                 {
@@ -180,15 +179,12 @@ hit_record ray_hits_anything(const scene& in_scene, const ray& in_ray)
                 }
             }
 
-            if (leaf_hit)
+            if (leaf_hit) for (uint32_t i = 0; i < current_entry.node.shape_group.count; ++i)
             {
-                for (uint32_t i = 0; i < current_entry.node.shape_group.count; ++i)
+                const shape& it_shape = in_scene.shapes[current_entry.node.shape_group.index + i];
+                if (const hit_record hit = ray_hits(in_scene, it_shape, in_ray, distances); hit.occurred)
                 {
-                    const shape& it_shape = in_scene.shapes[current_entry.node.shape_group.index + i];
-                    if (const hit_record hit = ray_hits(in_scene, it_shape, in_ray, distances); hit.occurred)
-                    {
-                        closest_hit = hit;
-                    }
+                    closest_hit = hit;
                 }
             }
         }

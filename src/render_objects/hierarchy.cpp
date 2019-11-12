@@ -61,9 +61,9 @@ static BIH_node_type split(
         it < 3;
         ++it, axis = (axis + 1) % 3
     ) {
-        const auto is_left = [axis, in_split_plane = out_left_box.origin()[axis]]
+        const auto is_to_the_left = [axis, in_split_plane = out_left_box.origin()[axis]]
             (const shape& a) { return a.bounding_box.origin()[axis] < in_split_plane; };
-        out_middle = std::partition(in_shapes.begin, in_shapes.end, is_left);
+        out_middle = std::partition(in_shapes.begin, in_shapes.end, is_to_the_left);
 
         if (out_middle != in_shapes.begin && out_middle != in_shapes.end)
         {
@@ -90,15 +90,12 @@ static void make_hierarchy(
     const array_index in_current,
     bounding_interval_hierarchy& out_nodes
 ) {
-    if (const ptrdiff_t shape_count = std::distance(in_shapes.begin, in_shapes.end); shape_count < 2)
+    const ptrdiff_t shape_count = std::distance(in_shapes.begin, in_shapes.end);
+    if (shape_count < 1)
     {
-        if (shape_count == 1)
-        {
-            out_nodes[in_current].shape_group.index = std::distance(in_shapes_container.begin(), in_shapes.begin);
-            out_nodes[in_current].shape_group.count = 1;
-        }
+        return;
     }
-    else
+    if (shape_count > 1)
     {
         std::vector<shape>::iterator middle = in_shapes.end;
         axis_aligned_box left_box = in_node_bounds;
@@ -112,13 +109,11 @@ static void make_hierarchy(
             out_nodes[in_current].children.right = out_nodes.size() - 1;
             make_hierarchy({ in_shapes.begin, middle }, in_shapes_container, left_box, out_nodes[in_current].children.left, out_nodes);
             make_hierarchy({ middle, in_shapes.end }, in_shapes_container, right_box, out_nodes[in_current].children.right, out_nodes);
-        }
-        else
-        {
-            out_nodes[in_current].shape_group.index = std::distance(in_shapes_container.begin(), in_shapes.begin);
-            out_nodes[in_current].shape_group.count = shape_count;
+            return;
         }
     }
+    out_nodes[in_current].shape_group.index = std::distance(in_shapes_container.begin(), in_shapes.begin);
+    out_nodes[in_current].shape_group.count = shape_count;
 }
 
 bounding_interval_hierarchy make_hierarchy(std::vector<shape>& in_shapes)

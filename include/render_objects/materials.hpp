@@ -32,6 +32,7 @@ struct diffuse_material
 struct emit_light_material
 {
     texture emit;
+    float intensity;
 };
 
 struct reflect_material

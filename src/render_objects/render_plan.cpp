@@ -13,7 +13,7 @@ render_plan render_plan::test_scene(const extent_2D<uint32_t>& image_size)
     };
 
     scene world;
-    world.sky = world.add_constant_texture(color{ 0.125f, 0.175f, 0.25f });
+    world.sky = world.add_constant_texture(color{ 0.125f, 0.175f, 0.25f } * 0.5f);
 
     // floor
     world.add_plane_shape(plane{ position_3D{ 0.f, -0.2f, 0.f }, y_axis }, {},
@@ -31,7 +31,7 @@ render_plan render_plan::test_scene(const extent_2D<uint32_t>& image_size)
         position_3D{ -1.f,  0.5f, 0.5f },
         position_3D{  1.f, -0.2f, 0.5f }, }, -z_axis, {}, mirror_material);
 
-    const material light_material = world.add_emit_light_material(world.add_constant_texture(white));
+    const material light_material = world.add_emit_light_material(world.add_constant_texture(white), 1.5f);
     world.add_triangle_shape(triangle{
         position_3D{ -1.f,  0.5f,  0.5f },
         position_3D{ -1.f, -0.2f,  0.5f },
@@ -50,7 +50,7 @@ render_plan render_plan::test_scene(const extent_2D<uint32_t>& image_size)
             world.add_constant_texture(color{ 0.7f, 0.7f, 1.f })));
 
     world.add_sphere_shape(sphere{ position_3D{ -0.2f, 0.5f, 0.2f }, 0.2f }, y_axis,
-        world.add_emit_light_material(world.add_constant_texture(color{ 1.f, 1.f, 0.5f })));
+        world.add_emit_light_material(world.add_constant_texture(color{ 1.f, 1.f, 0.5f }), 1.f));
 
     world.hierarchy = make_hierarchy(world.shapes);
     return render_plan{ image_size, cam, std::move(world) };
@@ -73,7 +73,7 @@ render_plan render_plan::cornell_box(const extent_2D<uint32_t>& image_size)
     const material red_wall = world.add_diffuse_material(world.add_constant_texture(color{ 0.65f, 0.05f, 0.05f }));
     const material white_wall = world.add_diffuse_material(world.add_constant_texture(color{ 0.73f, 0.73f, 0.73f }));
     const material green_wall = world.add_diffuse_material(world.add_constant_texture(color{ 0.12f, 0.45f, 0.15f }));
-    const material light = world.add_emit_light_material(world.add_constant_texture(color{ 15.f, 15.f, 15.f }));
+    const material light = world.add_emit_light_material(world.add_constant_texture(white), 15.f);
 
     // left wall
     world.add_triangle_shape(triangle{

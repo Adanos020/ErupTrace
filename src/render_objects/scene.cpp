@@ -183,9 +183,9 @@ material scene::add_emit_light_material(const emit_light_material& in_material)
     return material{ material_type::emit_light, this->emit_light_materials.size() - 1 };
 }
 
-material scene::add_emit_light_material(const texture& in_emit)
+material scene::add_emit_light_material(const texture& in_emit, const float in_intensity)
 {
-    return this->add_emit_light_material(emit_light_material{ in_emit });
+    return this->add_emit_light_material(emit_light_material{ in_emit, in_intensity });
 }
 
 material scene::add_reflect_material(const reflect_material& in_material)

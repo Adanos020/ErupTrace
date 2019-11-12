@@ -45,7 +45,7 @@ struct scene
     material add_diffuse_material(const diffuse_material&);
     material add_diffuse_material(const texture& albedo);
     material add_emit_light_material(const emit_light_material&);
-    material add_emit_light_material(const texture& emit);
+    material add_emit_light_material(const texture& emit, float intensity);
     material add_reflect_material(const reflect_material&);
     material add_reflect_material(float fuzz, const texture& albedo);
 
