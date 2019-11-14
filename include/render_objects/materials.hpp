@@ -1,7 +1,7 @@
 #pragma once
 
 #include <render_objects/textures.hpp>
-#include <util/numeric_types.hpp>
+#include <util/numeric.hpp>
 
 enum class material_type
 {

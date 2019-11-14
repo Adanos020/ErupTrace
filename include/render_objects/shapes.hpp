@@ -2,9 +2,9 @@
 
 #include <render_objects/materials.hpp>
 #include <util/geometric.hpp>
-#include <util/numeric_types.hpp>
+#include <util/numeric.hpp>
 #include <util/sizes.hpp>
-#include <util/vector_types.hpp>
+#include <util/vector.hpp>
 
 #include <array>
 

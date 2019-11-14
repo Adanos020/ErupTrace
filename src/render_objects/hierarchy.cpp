@@ -11,7 +11,7 @@
 // https://pdfs.semanticscholar.org/f110/495938b5f150fe7cf605e14dd01a30bd6290.pdf
 
 #include <render_objects/hierarchy.hpp>
-#include <util/numeric_types.hpp>
+#include <util/numeric.hpp>
 #include <util/pairs.hpp>
 
 #include <algorithm>

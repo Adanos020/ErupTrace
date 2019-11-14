@@ -1,6 +1,6 @@
 #pragma once
 
-#include <util/vector_types.hpp>
+#include <util/vector.hpp>
 
 struct rotator
 {

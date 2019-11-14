@@ -25,7 +25,7 @@ ray::ray(const line& in_line, const float in_time)
 {
 }
 
-ray ray::shoot(const camera& in_camera, const UV_mapping& in_direction)
+ray ray::shoot(const camera& in_camera, const UV_mapping& in_screen_UV)
 {
     const displacement_3D random_spot_on_lens = in_camera.lens_radius * random_in_unit_disk();
     const displacement_3D offset = (in_camera.u * random_spot_on_lens.x) + (in_camera.v * random_spot_on_lens.y);
@@ -33,8 +33,8 @@ ray ray::shoot(const camera& in_camera, const UV_mapping& in_direction)
 
     return ray{
         line { origin,
-            glm::normalize(in_camera.lower_left_corner + (in_direction.u * in_camera.horizontal)
-                + (in_direction.v * in_camera.vertical) - origin),
+            glm::normalize(in_camera.lower_left_corner + (in_screen_UV.U * in_camera.horizontal)
+                + (in_screen_UV.V * in_camera.vertical) - origin),
         },
         random_uniform(in_camera.time.min, in_camera.time.max),
     };

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <util/pairs.hpp>
-#include <util/vector_types.hpp>
+#include <util/vector.hpp>
 
 struct camera_create_info
 {

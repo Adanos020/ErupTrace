@@ -1,7 +1,8 @@
 #pragma once
 
+#include <render_objects/image.hpp>
 #include <util/colors.hpp>
-#include <util/numeric_types.hpp>
+#include <util/numeric.hpp>
 #include <util/pairs.hpp>
 #include <util/transform.hpp>
 #include <util/sizes.hpp>
@@ -36,23 +37,9 @@ struct constant_texture
 struct image_texture
 {
     array_index image_index;
-    min_max<UV_mapping> image_fragment;
-    extent_2D<uint32_t> image_size;
-
-    enum class wrap_method
-    {
-        repeat,
-        mirrored_repeat,
-        clamp_to_edge,
-        clamp_to_border,
-    } wrap;
-
-    enum class filtering_method
-    {
-        nearest,
-        linear,
-        anisotropic,
-    } filtering;
+    min_max<glm::uvec2> image_fragment;
+    image::wrap_method wrap;
+    image::filtering_method filtering;
 };
 
 struct noise_texture

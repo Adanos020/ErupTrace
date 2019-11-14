@@ -13,7 +13,9 @@ render_plan render_plan::test_scene(const extent_2D<uint32_t>& image_size)
     };
 
     scene world;
-    world.sky = world.add_constant_texture(color{ 0.125f, 0.175f, 0.25f } * 0.5f);
+    world.sky = world.add_image_texture(
+        world.add_image("textures/sky.jpg"), { { 0, 0 }, { 2880, 1440 } },
+        image::wrap_method::repeat, image::filtering_method::linear);
 
     // floor
     world.add_plane_shape(plane{ position_3D{ 0.f, -0.2f, 0.f }, y_axis }, {},
@@ -31,7 +33,7 @@ render_plan render_plan::test_scene(const extent_2D<uint32_t>& image_size)
         position_3D{ -1.f,  0.5f, 0.5f },
         position_3D{  1.f, -0.2f, 0.5f }, }, -z_axis, {}, mirror_material);
 
-    const material light_material = world.add_emit_light_material(world.add_constant_texture(white), 1.5f);
+    const material light_material = world.add_emit_light_material(world.add_constant_texture(white), 1.f);
     world.add_triangle_shape(triangle{
         position_3D{ -1.f,  0.5f,  0.5f },
         position_3D{ -1.f, -0.2f,  0.5f },
@@ -44,7 +46,9 @@ render_plan render_plan::test_scene(const extent_2D<uint32_t>& image_size)
     // balls
     world.add_sphere_shape(sphere{ position_3D{ -0.2f, 0.f, 0.f }, 0.2f }, glm::normalize(displacement_3D{ 1.f, 1.f, -1.f }),
         world.add_diffuse_material(
-            world.add_checker_texture(transform_2d{}.scale_to(30.f), color{ 0.5f, 0.7f, 1.f }, color{ 1.f, 0.3f, 0.5f })));
+            world.add_image_texture(
+                world.add_image("textures/earth.jpg"), { { 0, 0 }, { 8192, 4096 } },
+                image::wrap_method::repeat, image::filtering_method::linear)));
     world.add_sphere_shape(sphere{ position_3D{ 0.2f, 0.f, 0.f }, 0.2f }, y_axis,
         world.add_dielectric_material(1.5f,
             world.add_constant_texture(color{ 0.7f, 0.7f, 1.f })));

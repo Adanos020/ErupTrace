@@ -4,7 +4,7 @@
 #include <renderer_cpu/ray.hpp>
 #include <util/geometric.hpp>
 #include <util/pairs.hpp>
-#include <util/vector_types.hpp>
+#include <util/vector.hpp>
 
 #include <vector>
 

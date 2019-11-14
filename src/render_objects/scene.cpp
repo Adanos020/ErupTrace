@@ -1,5 +1,8 @@
 #include <render_objects/scene.hpp>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <external/stb_image.h>
+
 #include <cstring>
 
 std::vector<uint8_t> scene::to_bytes() const
@@ -138,19 +141,19 @@ shape scene::add_triangle_shape(const triangle_shape& in_triangle, const materia
 }
 
 shape scene::add_triangle_shape(const triangle& in_triangle, const std::array<direction_3D, 3>& in_normals,
-    const std::array<UV_mapping, 3>& in_uv_mappings, const material& in_material)
+    const std::array<UV_mapping, 3>& in_UV_mappings, const material& in_material)
 {
     return this->add_triangle_shape(triangle_shape{ in_triangle,
         in_normals[0], in_normals[1], in_normals[2],
-        in_uv_mappings[0], in_uv_mappings[1], in_uv_mappings[2] }, in_material);
+        in_UV_mappings[0], in_UV_mappings[1], in_UV_mappings[2] }, in_material);
 }
 
 shape scene::add_triangle_shape(const triangle& in_triangle, const direction_3D& in_normal,
-    const std::array<UV_mapping, 3>& in_uv_mappings, const material& in_material)
+    const std::array<UV_mapping, 3>& in_UV_mappings, const material& in_material)
 {
     return this->add_triangle_shape(triangle_shape{ in_triangle,
         in_normal, in_normal, in_normal,
-        in_uv_mappings[0], in_uv_mappings[1], in_uv_mappings[2] }, in_material);
+        in_UV_mappings[0], in_UV_mappings[1], in_UV_mappings[2] }, in_material);
 }
 
 // Materials
@@ -229,11 +232,10 @@ texture scene::add_image_texture(const image_texture& in_texture)
     return texture{ texture_type::image, this->image_textures.size() - 1 };
 }
 
-texture scene::add_image_texture(const array_index in_index, const min_max<UV_mapping>& in_uv_mapping,
-    const extent_2D<uint32_t>& in_image_size, const image_texture::wrap_method in_wrap,
-    const image_texture::filtering_method in_filtering)
+texture scene::add_image_texture(const array_index in_index, const min_max<glm::uvec2>& in_image_fragment,
+    const image::wrap_method in_wrap, const image::filtering_method in_filtering)
 {
-    return this->add_image_texture(image_texture{ in_index, in_uv_mapping, in_image_size, in_wrap, in_filtering });
+    return this->add_image_texture(image_texture{ in_index, in_image_fragment, in_wrap, in_filtering });
 }
 
 texture scene::add_noise_texture(const noise_texture& in_texture)
@@ -245,4 +247,33 @@ texture scene::add_noise_texture(const noise_texture& in_texture)
 texture scene::add_noise_texture(const transform_2d& in_transform, const color& in_color)
 {
     return this->add_noise_texture(noise_texture{ in_transform, in_color });
+}
+
+uint32_t scene::add_image(const image& in_image)
+{
+    this->images.push_back(in_image);
+    return this->images.size() - 1;
+}
+
+uint32_t scene::add_image(const std::string_view in_path)
+{
+    int32_t width = 0, height = 0, channels = 4;
+    uint8_t* data = stbi_load(in_path.data(), &width, &height, &channels, STBI_rgb_alpha);
+
+    image loaded_image{ extent_2D{ uint32_t(width), uint32_t(height) } };
+    loaded_image.pixels.resize(width * height);
+
+    constexpr float normalized_rgb = 1.f / 255.f;
+
+    for (uint32_t i = 0; i < loaded_image.pixels.size(); ++i)
+    {
+        loaded_image.pixels[i] = normalized_rgb * color{
+            data[4 * i + 0],
+            data[4 * i + 1],
+            data[4 * i + 2],
+        };
+    }
+
+    stbi_image_free(data);
+    return this->add_image(std::move(loaded_image));
 }

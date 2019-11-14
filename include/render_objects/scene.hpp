@@ -1,6 +1,7 @@
 #pragma once
 
 #include <render_objects/hierarchy.hpp>
+#include <render_objects/image.hpp>
 #include <render_objects/materials.hpp>
 #include <render_objects/shapes.hpp>
 #include <render_objects/textures.hpp>
@@ -29,6 +30,8 @@ struct scene
     std::vector<image_texture> image_textures;
     std::vector<noise_texture> noise_textures;
 
+    std::vector<image> images;
+
     std::vector<uint8_t> to_bytes() const;
     size_t size() const;
 
@@ -54,8 +57,10 @@ struct scene
     texture add_constant_texture(const constant_texture&);
     texture add_constant_texture(const color&);
     texture add_image_texture(const image_texture&);
-    texture add_image_texture(array_index, const min_max<UV_mapping>&, const extent_2D<uint32_t>&,
-        image_texture::wrap_method, image_texture::filtering_method);
+    texture add_image_texture(array_index, const min_max<glm::uvec2>& in_image_fragment, image::wrap_method, image::filtering_method);
     texture add_noise_texture(const noise_texture&);
     texture add_noise_texture(const transform_2d&, const color&);
+
+    uint32_t add_image(const image&);
+    uint32_t add_image(std::string_view path);
 };

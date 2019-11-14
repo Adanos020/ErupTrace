@@ -3,7 +3,7 @@
 #include <util/colors.hpp>
 #include <util/pairs.hpp>
 #include <util/sizes.hpp>
-#include <util/vector_types.hpp>
+#include <util/vector.hpp>
 
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -32,8 +32,8 @@ inline static UV_mapping uv_on_sphere(const position_3D& in_normalized_p, const 
 {
     const direction_3D tilted = in_normalized_p * glm::rotation(y_axis, in_axial_tilt);
     return UV_mapping{
-        1.f - (glm::atan(tilted.z, tilted.x) + glm::pi<float>()) * glm::one_over_two_pi<float>(),
-        (glm::asin(tilted.y) + glm::half_pi<float>()) * glm::one_over_pi<float>(),
+        1.f - ((glm::atan(tilted.z, tilted.x) + glm::pi<float>()) * glm::one_over_two_pi<float>()),
+        1.f - ((glm::asin(tilted.y) + glm::half_pi<float>()) * glm::one_over_pi<float>()),
     };
 }
 

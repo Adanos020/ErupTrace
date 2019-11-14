@@ -64,8 +64,8 @@ static hit_record ray_hits(const triangle_shape& in_triangle, const ray& in_ray,
                 const position_3D hit_point = in_ray.point_at_distance(distance);
                 const direction_3D normal = ((1.f - u - v) * in_triangle.normal_a) + (u * in_triangle.normal_b) + (v * in_triangle.normal_c);
                 const UV_mapping texture_mapping = {
-                    ((1.f - u - v) * in_triangle.uv_a.u) + (u * in_triangle.uv_b.u) + (v * in_triangle.uv_c.u),
-                    ((1.f - u - v) * in_triangle.uv_a.v) + (u * in_triangle.uv_b.v) + (v * in_triangle.uv_c.v),
+                    ((1.f - u - v) * in_triangle.uv_a.U) + (u * in_triangle.uv_b.U) + (v * in_triangle.uv_c.U),
+                    ((1.f - u - v) * in_triangle.uv_a.V) + (u * in_triangle.uv_b.V) + (v * in_triangle.uv_c.V),
                 };
                 return hit_record{ distance, hit_point, normal, {}, texture_mapping };
             }
@@ -99,36 +99,30 @@ static auto ray_hits_children_of(const ray& in_ray, const BIH_node& in_node, con
         (in_node.clip.left - in_ray.origin[axis]) * in_ray.inverse_direction[axis],
         (in_node.clip.right - in_ray.origin[axis]) * in_ray.inverse_direction[axis],
     };
-    const size_t first = size_t(in_ray.direction[axis] < 0);
-    const size_t second = 1 - first;
+    const size_t node_1 = size_t(in_ray.direction[axis] < 0);
+    const size_t node_2 = 1 - node_1;
 
     struct
     {
         bool occurred = false;
-        bool left;
+        bool is_left_node;
         min_max<float> distances;
-    } hit_first, hit_second;
+    } hit_1, hit_2;
 
-    if (distances_to_splitting_planes[first] > in_distances.min)
+    if (distances_to_splitting_planes[node_1] > in_distances.min)
     {
-        hit_first.occurred = true;
-        hit_first.left = first == 0;
-        hit_first.distances = {
-            in_distances.min,
-            std::min(in_distances.max, distances_to_splitting_planes[first]),
-        };
+        hit_1.occurred = true;
+        hit_1.is_left_node = node_1 == 0;
+        hit_1.distances = { in_distances.min, std::min(in_distances.max, distances_to_splitting_planes[node_1]) };
     }
-    if (distances_to_splitting_planes[second] < in_distances.max)
+    if (distances_to_splitting_planes[node_2] < in_distances.max)
     {
-        hit_second.occurred = true;
-        hit_second.left = second == 0;
-        hit_second.distances = {
-            std::max(in_distances.min, distances_to_splitting_planes[second]),
-            in_distances.max,
-        };
+        hit_2.occurred = true;
+        hit_2.is_left_node = node_2 == 0;
+        hit_2.distances = { std::max(in_distances.min, distances_to_splitting_planes[node_2]), in_distances.max };
     }
 
-    return std::make_pair(hit_first, hit_second);
+    return std::make_pair(hit_1, hit_2);
 }
 
 hit_record ray_hits_anything(const scene& in_scene, const ray& in_ray)
@@ -156,21 +150,25 @@ hit_record ray_hits_anything(const scene& in_scene, const ray& in_ray)
             bool leaf_hit = true;
             while (current_entry.node.type != BIH_node_type::leaf)
             {
-                const auto [hit_first, hit_second] = ray_hits_children_of(in_ray, current_entry.node, current_entry.distances);
-                const auto [first_node, second_node] = hit_first.left
-                    ? std::make_pair(current_entry.node.children.left, current_entry.node.children.right)
-                    : std::make_pair(current_entry.node.children.right, current_entry.node.children.left);
-                if (hit_first.occurred)
+                uint32_t node_1 = current_entry.node.children.left;
+                uint32_t node_2 = current_entry.node.children.right;
+                const auto [hit_1, hit_2] = ray_hits_children_of(in_ray, current_entry.node, current_entry.distances);
+                if (!hit_1.is_left_node)
                 {
-                    current_entry = { in_scene.hierarchy[first_node], hit_first.distances };
-                    if (hit_second.occurred)
+                    std::swap(node_1, node_2);
+                }
+
+                if (hit_1.occurred)
+                {
+                    current_entry = { in_scene.hierarchy[node_1], hit_1.distances };
+                    if (hit_2.occurred)
                     {
-                        node_stack.push({ in_scene.hierarchy[second_node], hit_second.distances });
+                        node_stack.push({ in_scene.hierarchy[node_2], hit_2.distances });
                     }
                 }
-                else if (hit_second.occurred)
+                else if (hit_2.occurred)
                 {
-                    current_entry = { in_scene.hierarchy[second_node], hit_second.distances };
+                    current_entry = { in_scene.hierarchy[node_2], hit_2.distances };
                 }
                 else
                 {

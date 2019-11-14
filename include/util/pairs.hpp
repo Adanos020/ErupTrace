@@ -44,16 +44,16 @@ struct from_to
 
 struct UV_mapping
 {
-    float u;
-    float v;
+    float U;
+    float V;
 
-    constexpr UV_mapping(const float u = 0.f, const float v = 0.f)
-        : u(u), v(v)
+    constexpr UV_mapping(const float U = 0.f, const float V = 0.f)
+        : U(U), V(V)
     {
     }
 
     constexpr UV_mapping(const std::pair<float, float>& pair)
-        : u(pair.first), v(pair.second)
+        : U(pair.first), V(pair.second)
     {
     }
 };

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <util/colors.hpp>
-#include <util/vector_types.hpp>
+#include <util/vector.hpp>
 
 #include <future>
 #include <vector>
