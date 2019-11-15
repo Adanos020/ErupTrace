@@ -2,6 +2,7 @@
 
 #include <util/interpolation.hpp>
 #include <util/numeric.hpp>
+#include <util/vector.hpp>
 
 // Wrapping
 
@@ -79,21 +80,24 @@ static color filter_linear(const image& in_sampled_image, const UV_mapping& in_U
 {
     const uint32_t width = in_sampled_image.size.width;
     const uint32_t height = in_sampled_image.size.height;
-    
-    const UV_mapping delta = { 1.f / (width - 1), 1.f / (height - 1) };
-    const min_max<UV_mapping> nearest = {
-        UV_mapping{ delta.U * glm::floor(in_UV.U / delta.U), delta.V * glm::floor(in_UV.V / delta.V) },
-        UV_mapping{ delta.U * glm::ceil(in_UV.U / delta.U), delta.V * glm::ceil(in_UV.V / delta.V) },
-    };
-    
-    const uint32_t left  = map(nearest.min.U, { { 0.f, 1.f }, { 0, in_sampled_image.size.width - 1 } });
-    const uint32_t right = map(nearest.max.U, { { 0.f, 1.f }, { 0, in_sampled_image.size.width - 1 } });
-    const uint32_t up    = map(nearest.min.V, { { 0.f, 1.f }, { 0, in_sampled_image.size.height - 1 } });
-    const uint32_t down  = map(nearest.max.V, { { 0.f, 1.f }, { 0, in_sampled_image.size.height - 1 } });
+
+    const texture_position_2D texcoord = { in_UV.U * (width - 1), in_UV.V * (height - 1) };
+
+    const uint32_t left = glm::floor(texcoord.s);
+    const uint32_t up = glm::floor(texcoord.t);
+    const uint32_t right = left + 1;
+    const uint32_t down = up + 1;
 
     const std::array<color, 4> neighbors = {
-        in_sampled_image.pixels[left + up * width], in_sampled_image.pixels[right + up * width],
-        in_sampled_image.pixels[left + down * width], in_sampled_image.pixels[right + down * width],
+        in_sampled_image.pixels[left + up * width],
+        in_sampled_image.pixels[right + up * width],
+        in_sampled_image.pixels[left + down * width],
+        in_sampled_image.pixels[right + down * width],
+    };
+
+    const min_max<UV_mapping> nearest = {
+        UV_mapping{ float(left) / width, float(up) / height },
+        UV_mapping{ float(right) / width, float(down) / height },
     };
 
     const float U = normalize(in_UV.U, { nearest.min.U, nearest.max.U });
@@ -103,10 +107,7 @@ static color filter_linear(const image& in_sampled_image, const UV_mapping& in_U
 
 static color filter_nearest(const image& in_sampled_image, const UV_mapping& in_UV)
 {
-    const glm::ivec2 nearest = {
-        glm::clamp<int32_t>(in_UV.U * in_sampled_image.size.width, 0.f, in_sampled_image.size.width - 1.f),
-        glm::clamp<int32_t>(in_UV.V * in_sampled_image.size.height - 0.001f, 0.f, in_sampled_image.size.height - 1.f),
-    };
+    const pixel_position nearest = { in_UV.U * (in_sampled_image.size.width - 1), in_UV.V * (in_sampled_image.size.height - 1) };
     return in_sampled_image.pixels[nearest.x + (nearest.y * in_sampled_image.size.width)];
 }
 

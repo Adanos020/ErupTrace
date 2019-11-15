@@ -44,7 +44,7 @@ render_plan render_plan::test_scene(const extent_2D<uint32_t>& image_size)
         position_3D{ -1.f, -0.2f, -0.5f }, }, x_axis, {}, light_material);
 
     // balls
-    world.add_sphere_shape(sphere{ position_3D{ -0.2f, 0.f, 0.f }, 0.2f }, glm::normalize(displacement_3D{ 1.f, 1.f, -1.f }),
+    world.add_sphere_shape(sphere{ position_3D{ -0.2f, 0.f, 0.f }, 0.2f }, glm::normalize(displacement_3D{ 0.5f, 1.f, -0.5f }),
         world.add_diffuse_material(
             world.add_image_texture(
                 world.add_image("textures/earth.jpg"), { { 0, 0 }, { 8192, 4096 } },
@@ -54,7 +54,8 @@ render_plan render_plan::test_scene(const extent_2D<uint32_t>& image_size)
             world.add_constant_texture(color{ 0.7f, 0.7f, 1.f })));
 
     world.add_sphere_shape(sphere{ position_3D{ -0.2f, 0.5f, 0.2f }, 0.2f }, y_axis,
-        world.add_emit_light_material(world.add_constant_texture(color{ 1.f, 1.f, 0.5f }), 1.f));
+        world.add_emit_light_material(
+            world.add_constant_texture(color{ 1.f, 1.f, 0.5f }), 1.5f));
 
     world.hierarchy = make_hierarchy(world.shapes);
     return render_plan{ image_size, cam, std::move(world) };

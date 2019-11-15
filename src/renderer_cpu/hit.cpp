@@ -128,7 +128,7 @@ static auto ray_hits_children_of(const ray& in_ray, const BIH_node& in_node, con
 hit_record ray_hits_anything(const scene& in_scene, const ray& in_ray)
 {
     hit_record closest_hit = hit_record::nope();
-    min_max<float> distances = { 0.0001f, infinity };
+    min_max<float> distances = { 0.0001f, infinity<float> };
 
     for (const shape& it_shape : in_scene.infinite_shapes)
     {
