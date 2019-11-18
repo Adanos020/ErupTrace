@@ -36,7 +36,8 @@ static hit_record ray_hits(const sphere_shape& in_sphere, const ray& in_ray, con
         if (in_distances.is_value_clamped(root))
         {
             const position_3D hit_point = in_ray.point_at_distance(root);
-            const UV_mapping texture_coord = uv_on_sphere((hit_point - in_sphere.origin) / in_sphere.radius, in_sphere.axial_tilt);
+            const barycentric_2D texture_coord = mapping_on_sphere(
+                (hit_point - in_sphere.origin) / in_sphere.radius, in_sphere.axial_tilt);
             return hit_record{ root, hit_point, (hit_point - in_sphere.origin) / in_sphere.radius, {}, texture_coord };
         }
     }
@@ -63,9 +64,9 @@ static hit_record ray_hits(const triangle_shape& in_triangle, const ray& in_ray,
             {
                 const position_3D hit_point = in_ray.point_at_distance(distance);
                 const direction_3D normal = ((1.f - u - v) * in_triangle.normal_a) + (u * in_triangle.normal_b) + (v * in_triangle.normal_c);
-                const UV_mapping texture_mapping = {
-                    ((1.f - u - v) * in_triangle.uv_a.U) + (u * in_triangle.uv_b.U) + (v * in_triangle.uv_c.U),
-                    ((1.f - u - v) * in_triangle.uv_a.V) + (u * in_triangle.uv_b.V) + (v * in_triangle.uv_c.V),
+                const barycentric_2D texture_mapping = {
+                    ((1.f - u - v) * in_triangle.mapping_a.U) + (u * in_triangle.mapping_b.U) + (v * in_triangle.mapping_c.U),
+                    ((1.f - u - v) * in_triangle.mapping_a.V) + (u * in_triangle.mapping_b.V) + (v * in_triangle.mapping_c.V),
                 };
                 return hit_record{ distance, hit_point, normal, {}, texture_mapping };
             }

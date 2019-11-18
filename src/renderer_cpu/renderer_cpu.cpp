@@ -60,9 +60,9 @@ std::vector<rgba> renderer_cpu::render_fragment(const render_plan* plan, const p
             color col{ 0.f };
             for (uint32_t s = 0; s < sample_count; ++s)
             {
-                const UV_mapping ray_direction = {
-                    float(x + random_uniform<float>()) * inverse_image_width,
-                    float(plan->image_size.height - y + random_uniform<float>())* inverse_image_height,
+                const barycentric_2D ray_direction = {
+                    (x + random_uniform<float>()) * inverse_image_width,
+                    (plan->image_size.height - y + random_uniform<float>()) * inverse_image_height,
                 };
                 const ray r = ray::shoot(plan->cam, ray_direction);
                 col += r.trace(plan->world);

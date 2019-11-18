@@ -1,6 +1,7 @@
 #pragma once
 
 #include <render_objects/materials.hpp>
+#include <util/barycentric.hpp>
 #include <util/geometric.hpp>
 #include <util/numeric.hpp>
 #include <util/sizes.hpp>
@@ -44,7 +45,7 @@ struct sphere_shape : sphere
 struct triangle_shape : triangle
 {
     direction_3D normal_a, normal_b, normal_c;
-    UV_mapping uv_a, uv_b, uv_c;
+    barycentric_2D mapping_a, mapping_b, mapping_c;
 
     axis_aligned_box bounding_box() const
     {

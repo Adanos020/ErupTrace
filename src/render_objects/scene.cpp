@@ -141,19 +141,19 @@ shape scene::add_triangle_shape(const triangle_shape& in_triangle, const materia
 }
 
 shape scene::add_triangle_shape(const triangle& in_triangle, const std::array<direction_3D, 3>& in_normals,
-    const std::array<UV_mapping, 3>& in_UV_mappings, const material& in_material)
+    const std::array<barycentric_2D, 3>& in_barycentric_2Ds, const material& in_material)
 {
     return this->add_triangle_shape(triangle_shape{ in_triangle,
         in_normals[0], in_normals[1], in_normals[2],
-        in_UV_mappings[0], in_UV_mappings[1], in_UV_mappings[2] }, in_material);
+        in_barycentric_2Ds[0], in_barycentric_2Ds[1], in_barycentric_2Ds[2] }, in_material);
 }
 
 shape scene::add_triangle_shape(const triangle& in_triangle, const direction_3D& in_normal,
-    const std::array<UV_mapping, 3>& in_UV_mappings, const material& in_material)
+    const std::array<barycentric_2D, 3>& in_barycentric_2Ds, const material& in_material)
 {
     return this->add_triangle_shape(triangle_shape{ in_triangle,
         in_normal, in_normal, in_normal,
-        in_UV_mappings[0], in_UV_mappings[1], in_UV_mappings[2] }, in_material);
+        in_barycentric_2Ds[0], in_barycentric_2Ds[1], in_barycentric_2Ds[2] }, in_material);
 }
 
 // Materials

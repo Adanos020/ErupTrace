@@ -40,8 +40,8 @@ struct scene
     shape add_sphere_shape(const sphere_shape&, const material&);
     shape add_sphere_shape(const sphere&, const direction_3D& axial_tilt, const material&);
     shape add_triangle_shape(const triangle_shape&, const material&);
-    shape add_triangle_shape(const triangle&, const std::array<direction_3D, 3>& normals, const std::array<UV_mapping, 3>&, const material&);
-    shape add_triangle_shape(const triangle&, const direction_3D& normal, const std::array<UV_mapping, 3>&, const material&);
+    shape add_triangle_shape(const triangle&, const std::array<direction_3D, 3>& normals, const std::array<barycentric_2D, 3>&, const material&);
+    shape add_triangle_shape(const triangle&, const direction_3D& normal, const std::array<barycentric_2D, 3>&, const material&);
 
     material add_dielectric_material(const dielectric_material&);
     material add_dielectric_material(float refractive_index, const texture& albedo);

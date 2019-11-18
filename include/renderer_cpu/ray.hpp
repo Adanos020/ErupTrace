@@ -11,6 +11,6 @@ struct ray : line
 
     ray();
     ray(const line&, float time = 0.f);
-    static ray shoot(const struct camera&, const UV_mapping&);
+    static ray shoot(const struct camera&, const barycentric_2D&);
     color trace(const struct scene&, int32_t depth = 50) const;
 };

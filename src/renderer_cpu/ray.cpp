@@ -25,7 +25,7 @@ ray::ray(const line& in_line, const float in_time)
 {
 }
 
-ray ray::shoot(const camera& in_camera, const UV_mapping& in_screen_UV)
+ray ray::shoot(const camera& in_camera, const barycentric_2D& in_screen_UV)
 {
     const displacement_3D random_spot_on_lens = in_camera.lens_radius * random_in_unit_disk();
     const displacement_3D offset = (in_camera.u * random_spot_on_lens.x) + (in_camera.v * random_spot_on_lens.y);
@@ -54,5 +54,6 @@ color ray::trace(const scene& in_scene, const int32_t depth) const
             return emitted;
         }
     }
-    return color_on_texture(in_scene, in_scene.sky, uv_on_sphere(glm::normalize(this->direction), y_axis), this->origin + this->direction);
+    return color_on_texture(in_scene, in_scene.sky, mapping_on_sphere(glm::normalize(this->direction), y_axis),
+        this->origin + this->direction);
 }

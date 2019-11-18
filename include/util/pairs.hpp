@@ -42,22 +42,6 @@ struct from_to
     }
 };
 
-struct UV_mapping
-{
-    float U;
-    float V;
-
-    constexpr UV_mapping(const float U = 0.f, const float V = 0.f)
-        : U(U), V(V)
-    {
-    }
-
-    constexpr UV_mapping(const std::pair<float, float>& pair)
-        : U(pair.first), V(pair.second)
-    {
-    }
-};
-
 template <typename T>
 struct iterator_pair
 {

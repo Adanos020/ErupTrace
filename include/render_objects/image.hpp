@@ -1,7 +1,7 @@
 #pragma once
 
+#include <util/barycentric.hpp>
 #include <util/colors.hpp>
-#include <util/pairs.hpp>
 #include <util/sizes.hpp>
 
 #include <vector>
@@ -27,5 +27,5 @@ struct image
     std::vector<color> pixels;
 };
 
-bool wrap(UV_mapping& in_UV, image::wrap_method);
-color filter(const image&, const UV_mapping&, image::filtering_method);
+bool wrap(barycentric_2D& in_mapping, image::wrap_method);
+color filter(const image&, const barycentric_2D&, image::filtering_method);
