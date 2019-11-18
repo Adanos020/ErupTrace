@@ -82,7 +82,10 @@ static color filter_linear(const image& in_sampled_image, const barycentric_2D& 
     const uint32_t width = in_sampled_image.size.width;
     const uint32_t height = in_sampled_image.size.height;
 
-    const texture_position_2D texcoord = { in_mapping.U * (width - 1), in_mapping.V * (height - 1) };
+    const texture_position_2D texcoord = {
+        in_mapping.U * (width - 1),
+        in_mapping.V * (height - 1),
+    };
 
     const uint32_t left = glm::floor(texcoord.s);
     const uint32_t up = glm::floor(texcoord.t);

@@ -31,7 +31,8 @@ struct sphere
 
 inline static barycentric_2D mapping_on_sphere(const position_3D& in_normalized_p, const direction_3D& in_axial_tilt)
 {
-    const direction_3D tilted = in_normalized_p * glm::rotation(y_axis, in_axial_tilt);
+    const direction_3D tilted = glm::clamp(in_normalized_p * glm::rotation(y_axis, in_axial_tilt),
+        direction_3D{ -1.f }, direction_3D{ 1.f });
     return barycentric_2D{
         1.f - ((glm::atan(tilted.z, tilted.x) + glm::pi<float>()) * glm::one_over_two_pi<float>()),
         1.f - ((glm::asin(tilted.y) + glm::half_pi<float>()) * glm::one_over_pi<float>()),

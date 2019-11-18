@@ -9,7 +9,11 @@
 
 inline static bool random_chance(const float in_probability = 0.5f)
 {
+#if NDEBUG
     static const auto seed = uint32_t(std::chrono::system_clock::now().time_since_epoch().count());
+#else
+    static const uint32_t seed = 2137;
+#endif
     static std::default_random_engine rng{ seed };
     std::bernoulli_distribution distribution{ in_probability };
     return distribution(rng);
