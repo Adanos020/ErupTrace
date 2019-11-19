@@ -29,6 +29,6 @@ struct image
     std::vector<color> pixels;
 };
 
-bool wrap(barycentric_2D& in_mapping, image::wrap_method);
-color filter(const image&, const barycentric_2D& mapping, const min_max<texture_position_2D>& fragment,
-    image::wrap_method, image::filtering_method);
+color filter_cubic(const image&, const min_max<texture_position_2D>& fragment, const barycentric_2D& mapping, image::wrap_method);
+color filter_linear(const image&, const min_max<texture_position_2D>& fragment, const barycentric_2D& mapping, image::wrap_method);
+color filter_nearest(const image&, const min_max<texture_position_2D>& fragment, const barycentric_2D& mapping, image::wrap_method);

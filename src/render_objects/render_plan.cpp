@@ -171,7 +171,7 @@ render_plan render_plan::grass_block(const extent_2D<uint32_t>& image_size)
             image::wrap_method::repeat, image::filtering_method::nearest));
     const material side_face = world.add_diffuse_material(
         world.add_image_texture(grass_image, { { 16, 0 }, { 32, 16 } },
-            image::wrap_method::repeat, image::filtering_method::nearest));
+            image::wrap_method::repeat, image::filtering_method::linear));
 
     world.add_plane_shape(plane{ position_3D{ 0.f, -0.5f, 0.f }, y_axis }, {},
         world.add_diffuse_material(

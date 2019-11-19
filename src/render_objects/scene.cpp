@@ -158,40 +158,29 @@ shape scene::add_triangle_shape(const triangle& in_triangle, const direction_3D&
 
 void scene::assemble_quad(const quad_assembly_info& in_info)
 {
-    this->add_triangle_shape(
-        triangle{
-            in_info.vertices[0],
-            in_info.vertices[1],
-            in_info.vertices[2],
-        },
-        std::array<direction_3D, 3>{
-            in_info.normals[0],
-            in_info.normals[1],
-            in_info.normals[2],
-        },
-        std::array<barycentric_2D, 3>{
-            in_info.mappings[0],
-            in_info.mappings[1],
-            in_info.mappings[2],
-        },
-        in_info.mat);
-    this->add_triangle_shape(
-        triangle{
-            in_info.vertices[2],
-            in_info.vertices[3],
-            in_info.vertices[0],
-        },
-        std::array<direction_3D, 3>{
-            in_info.normals[2],
-            in_info.normals[3],
-            in_info.normals[0],
-        },
-        std::array<barycentric_2D, 3>{
-            in_info.mappings[2],
-            in_info.mappings[3],
-            in_info.mappings[0],
-        },
-        in_info.mat);
+    for (size_t i = 0; i <= 2; i += 2)
+    {
+        const size_t j_0 = i;
+        const size_t j_1 = i + 1;
+        const size_t j_2 = (i + 2) % 4;
+        this->add_triangle_shape(
+            triangle{
+                in_info.vertices[j_0],
+                in_info.vertices[j_1],
+                in_info.vertices[j_2],
+            },
+            std::array<direction_3D, 3>{
+                in_info.normals[j_0],
+                in_info.normals[j_1],
+                in_info.normals[j_2],
+            },
+            std::array<barycentric_2D, 3>{
+                in_info.mappings[j_0],
+                in_info.mappings[j_1],
+                in_info.mappings[j_2],
+            },
+            in_info.mat);
+    }
 }
 
 void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
