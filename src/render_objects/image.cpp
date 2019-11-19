@@ -63,15 +63,14 @@ color filter_cubic(const image& in_sampled_image, const min_max<texture_position
 color filter_linear(const image& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
     const barycentric_2D& in_mapping, const image::wrap_method in_wrap_method)
 {
-    const uint32_t width = in_image_fragment.max.s - in_image_fragment.min.s;
-    const uint32_t height = in_image_fragment.max.t - in_image_fragment.min.t;
-
+    const float width = in_image_fragment.max.s - in_image_fragment.min.s;
+    const float height = in_image_fragment.max.t - in_image_fragment.min.t;
     const float inverse_width = 1.f / (width - 1.f);
     const float inverse_height = 1.f / (height - 1.f);
 
     const texture_position_2D texcoord = {
-        in_image_fragment.min.s + in_mapping.U * (width - 1) - 0.5f,
-        in_image_fragment.min.t + in_mapping.V * (height - 1) - 0.5f,
+        in_image_fragment.min.s + in_mapping.U * (width - 1),
+        in_image_fragment.min.t + in_mapping.V * (height - 1),
     };
 
     const float left = wrap(glm::floor(texcoord.s), { in_image_fragment.min.s, in_image_fragment.max.s }, in_wrap_method);
@@ -98,10 +97,10 @@ color filter_linear(const image& in_sampled_image, const min_max<texture_positio
     };
 
     const float U = normalize(
-        wrap(in_mapping.U - (0.5f * inverse_width), { 0.f, 1.f }, in_wrap_method),
+        wrap(in_mapping.U, { 0.f, 1.f }, in_wrap_method),
         { nearest.min.U, nearest.max.U });
     const float V = normalize(
-        wrap(in_mapping.V - (0.5f * inverse_height), { 0.f, 1.f }, in_wrap_method),
+        wrap(in_mapping.V, { 0.f, 1.f }, in_wrap_method),
         { nearest.min.V, nearest.max.V });
     return bilerp(neighbors, U, V);
 }
