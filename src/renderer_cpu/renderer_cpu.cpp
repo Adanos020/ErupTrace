@@ -51,7 +51,7 @@ std::vector<rgba> renderer_cpu::render_fragment(const render_plan* plan, const p
     const float inverse_sample_count = 1.f / sample_count;
 
     std::vector<rgba> image_fragment;
-    image_fragment.reserve(size_t(width) * size_t(height));
+    image_fragment.reserve(width * height);
 
     for (uint32_t y = top_left.y; y < bottom_right.y; ++y)
     {

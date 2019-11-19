@@ -67,7 +67,8 @@ bool wrap(barycentric_2D& out_mapping, const image::wrap_method in_wrap_method)
 
 // Filtering
 
-static color filter_cubic(const image& in_sampled_image, const barycentric_2D& in_mapping)
+static color filter_cubic(const image& in_sampled_image, const barycentric_2D& in_mapping,
+    const image::wrap_method in_wrap_method, const min_max<texture_position_2D>& in_image_fragment)
 {
     const std::array<color, 16> neighbors = {
 
@@ -77,31 +78,38 @@ static color filter_cubic(const image& in_sampled_image, const barycentric_2D& i
     return bicubic(neighbors, U, V);
 }
 
-static color filter_linear(const image& in_sampled_image, const barycentric_2D& in_mapping)
+static color filter_linear(const image& in_sampled_image, const barycentric_2D& in_mapping,
+    const image::wrap_method in_wrap_method, const min_max<texture_position_2D>& in_image_fragment)
 {
-    const uint32_t width = in_sampled_image.size.width;
-    const uint32_t height = in_sampled_image.size.height;
+    const uint32_t width = in_image_fragment.max.s - in_image_fragment.min.s;
+    const uint32_t height = in_image_fragment.max.t - in_image_fragment.min.t;
 
     const texture_position_2D texcoord = {
-        in_mapping.U * (width - 1),
-        in_mapping.V * (height - 1),
+        in_image_fragment.min.s + in_mapping.U * (width - 1),
+        in_image_fragment.min.t + in_mapping.V * (height - 1),
     };
 
-    const uint32_t left = glm::floor(texcoord.s);
-    const uint32_t up = glm::floor(texcoord.t);
+    const uint32_t left = glm::round(texcoord.s);
+    const uint32_t up = glm::round(texcoord.t);
     const uint32_t right = left + 1;
     const uint32_t down = up + 1;
 
-    const std::array<color, 4> neighbors = {
-        in_sampled_image.pixels[left + up * width],
-        in_sampled_image.pixels[right + up * width],
-        in_sampled_image.pixels[left + down * width],
-        in_sampled_image.pixels[right + down * width],
+    const min_max<barycentric_2D> nearest = {
+        barycentric_2D{
+            float(left - in_image_fragment.min.s) / width,
+            float(up - in_image_fragment.min.t) / height,
+        },
+        barycentric_2D{
+            float(right - in_image_fragment.min.s) / width,
+            float(down - in_image_fragment.min.t) / height,
+        },
     };
 
-    const min_max<barycentric_2D> nearest = {
-        barycentric_2D{ float(left) / width, float(up) / height },
-        barycentric_2D{ float(right) / width, float(down) / height },
+    const std::array<color, 4> neighbors = {
+        in_sampled_image.pixels[left + up * in_sampled_image.size.width],
+        in_sampled_image.pixels[right + up * in_sampled_image.size.width],
+        in_sampled_image.pixels[left + down * in_sampled_image.size.width],
+        in_sampled_image.pixels[right + down * in_sampled_image.size.width],
     };
 
     const float U = normalize(in_mapping.U, { nearest.min.U, nearest.max.U });
@@ -109,22 +117,31 @@ static color filter_linear(const image& in_sampled_image, const barycentric_2D& 
     return bilerp(neighbors, U, V);
 }
 
-static color filter_nearest(const image& in_sampled_image, const barycentric_2D& in_mapping)
+static color filter_nearest(const image& in_sampled_image, const barycentric_2D& in_mapping,
+    const image::wrap_method in_wrap_method, const min_max<texture_position_2D>& in_image_fragment)
 {
-    const pixel_position nearest = {
-        in_mapping.U * (in_sampled_image.size.width - 1),
-        in_mapping.V * (in_sampled_image.size.height - 1),
-    };
-    return in_sampled_image.pixels[nearest.x + (nearest.y * in_sampled_image.size.width)];
+    barycentric_2D final_mapping = in_mapping;
+    if (wrap(final_mapping, in_wrap_method))
+    {
+        const uint32_t width = in_image_fragment.max.s - in_image_fragment.min.s;
+        const uint32_t height = in_image_fragment.max.t - in_image_fragment.min.t;
+        const pixel_position nearest = {
+            in_image_fragment.min.s + final_mapping.U * (width - 1),
+            in_image_fragment.min.t + final_mapping.V * (height - 1),
+        };
+        return in_sampled_image.pixels[nearest.x + (nearest.y * in_sampled_image.size.width)];
+    }
+    return black;
 }
 
-color filter(const image& in_sampled_image, const barycentric_2D& in_mapping, const image::filtering_method in_filtering_method)
+color filter(const image& in_sampled_image, const barycentric_2D& in_mapping, const min_max<texture_position_2D>& in_image_fragment,
+    const image::wrap_method in_wrap_method, const image::filtering_method in_filtering_method)
 {
     switch (in_filtering_method)
     {
-        case image::filtering_method::cubic:   return filter_cubic(in_sampled_image, in_mapping);
-        case image::filtering_method::linear:  return filter_linear(in_sampled_image, in_mapping);
-        case image::filtering_method::nearest: return filter_nearest(in_sampled_image, in_mapping);
+        case image::filtering_method::cubic:   return filter_cubic(in_sampled_image, in_mapping, in_wrap_method, in_image_fragment);
+        case image::filtering_method::linear:  return filter_linear(in_sampled_image, in_mapping, in_wrap_method, in_image_fragment);
+        case image::filtering_method::nearest: return filter_nearest(in_sampled_image, in_mapping, in_wrap_method, in_image_fragment);
     }
     return black;
 }

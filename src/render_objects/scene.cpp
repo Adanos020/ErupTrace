@@ -149,11 +149,123 @@ shape scene::add_triangle_shape(const triangle& in_triangle, const std::array<di
 }
 
 shape scene::add_triangle_shape(const triangle& in_triangle, const direction_3D& in_normal,
-    const std::array<barycentric_2D, 3>& in_barycentric_2Ds, const material& in_material)
+    const std::array<barycentric_2D, 3>& in_mappings, const material& in_material)
 {
     return this->add_triangle_shape(triangle_shape{ in_triangle,
         in_normal, in_normal, in_normal,
-        in_barycentric_2Ds[0], in_barycentric_2Ds[1], in_barycentric_2Ds[2] }, in_material);
+        in_mappings[0], in_mappings[1], in_mappings[2] }, in_material);
+}
+
+void scene::assemble_quad(const quad_assembly_info& in_info)
+{
+    this->add_triangle_shape(
+        triangle{
+            in_info.vertices[0],
+            in_info.vertices[1],
+            in_info.vertices[2],
+        },
+        std::array<direction_3D, 3>{
+            in_info.normals[0],
+            in_info.normals[1],
+            in_info.normals[2],
+        },
+        std::array<barycentric_2D, 3>{
+            in_info.mappings[0],
+            in_info.mappings[1],
+            in_info.mappings[2],
+        },
+        in_info.mat);
+    this->add_triangle_shape(
+        triangle{
+            in_info.vertices[2],
+            in_info.vertices[3],
+            in_info.vertices[0],
+        },
+        std::array<direction_3D, 3>{
+            in_info.normals[2],
+            in_info.normals[3],
+            in_info.normals[0],
+        },
+        std::array<barycentric_2D, 3>{
+            in_info.mappings[2],
+            in_info.mappings[3],
+            in_info.mappings[0],
+        },
+        in_info.mat);
+}
+
+void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
+{
+    const float width = in_info.half_size.width;
+    const float height = in_info.half_size.height;
+    const float depth = in_info.half_size.depth;
+
+    this->assemble_quad({
+        {
+            in_info.origin + (in_info.transform * displacement_3D{  width, -height, -depth }),
+            in_info.origin + (in_info.transform * displacement_3D{  width, -height,  depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width, -height,  depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width, -height, -depth }),
+        },
+        { -y_axis, -y_axis, -y_axis, -y_axis },
+        { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
+        in_info.bottom_face,
+    });
+    this->assemble_quad({
+        {
+            in_info.origin + (in_info.transform * displacement_3D{  width, height, -depth }),
+            in_info.origin + (in_info.transform * displacement_3D{  width, height,  depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width, height,  depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width, height, -depth }),
+        },
+        { y_axis, y_axis, y_axis, y_axis },
+        { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
+        in_info.top_face,
+    });
+    this->assemble_quad({
+        {
+            in_info.origin + (in_info.transform * displacement_3D{ -width, -height,  depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width,  height,  depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width,  height, -depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width, -height, -depth }),
+        },
+        { -x_axis, -x_axis, -x_axis, -x_axis },
+        { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
+        in_info.left_face,
+    });
+    this->assemble_quad({
+        {
+            in_info.origin + (in_info.transform * displacement_3D{ width, -height,  depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ width,  height,  depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ width,  height, -depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ width, -height, -depth }),
+        },
+        { x_axis, x_axis, x_axis, x_axis },
+        { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
+        in_info.right_face,
+    });
+    this->assemble_quad({
+        {
+            in_info.origin + (in_info.transform * displacement_3D{  width, -height, -depth }),
+            in_info.origin + (in_info.transform * displacement_3D{  width,  height, -depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width,  height, -depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width, -height, -depth }),
+        },
+        { -z_axis, -z_axis, -z_axis, -z_axis },
+        { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
+        in_info.front_face,
+    });
+    this->assemble_quad({
+        {
+            in_info.origin + (in_info.transform * displacement_3D{  width, -height, depth }),
+            in_info.origin + (in_info.transform * displacement_3D{  width,  height, depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width,  height, depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width, -height, depth }),
+        },
+        { z_axis, z_axis, z_axis, z_axis },
+        { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
+        in_info.back_face,
+    });
 }
 
 // Materials
@@ -232,7 +344,7 @@ texture scene::add_image_texture(const image_texture& in_texture)
     return texture{ texture_type::image, this->image_textures.size() - 1 };
 }
 
-texture scene::add_image_texture(const array_index in_index, const min_max<glm::uvec2>& in_image_fragment,
+texture scene::add_image_texture(const array_index in_index, const min_max<texture_position_2D>& in_image_fragment,
     const image::wrap_method in_wrap, const image::filtering_method in_filtering)
 {
     return this->add_image_texture(image_texture{ in_index, in_image_fragment, in_wrap, in_filtering });

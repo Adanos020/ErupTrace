@@ -4,6 +4,7 @@
 #include <render_objects/image.hpp>
 #include <render_objects/materials.hpp>
 #include <render_objects/shapes.hpp>
+#include <render_objects/shape_assembly.hpp>
 #include <render_objects/textures.hpp>
 
 #include <vector>
@@ -42,6 +43,9 @@ struct scene
     shape add_triangle_shape(const triangle_shape&, const material&);
     shape add_triangle_shape(const triangle&, const std::array<direction_3D, 3>& normals, const std::array<barycentric_2D, 3>&, const material&);
     shape add_triangle_shape(const triangle&, const direction_3D& normal, const std::array<barycentric_2D, 3>&, const material&);
+    
+    void assemble_quad(const quad_assembly_info&);
+    void assemble_cuboid(const cuboid_assembly_info&);
 
     material add_dielectric_material(const dielectric_material&);
     material add_dielectric_material(float refractive_index, const texture& albedo);
@@ -57,7 +61,7 @@ struct scene
     texture add_constant_texture(const constant_texture&);
     texture add_constant_texture(const color&);
     texture add_image_texture(const image_texture&);
-    texture add_image_texture(array_index, const min_max<glm::uvec2>& in_image_fragment, image::wrap_method, image::filtering_method);
+    texture add_image_texture(array_index, const min_max<texture_position_2D>& in_image_fragment, image::wrap_method, image::filtering_method);
     texture add_noise_texture(const noise_texture&);
     texture add_noise_texture(const transform_2d&, const color&);
 

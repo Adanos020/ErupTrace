@@ -2,7 +2,9 @@
 
 #include <util/barycentric.hpp>
 #include <util/colors.hpp>
+#include <util/pairs.hpp>
 #include <util/sizes.hpp>
+#include <util/vector.hpp>
 
 #include <vector>
 
@@ -28,4 +30,5 @@ struct image
 };
 
 bool wrap(barycentric_2D& in_mapping, image::wrap_method);
-color filter(const image&, const barycentric_2D&, image::filtering_method);
+color filter(const image&, const barycentric_2D& mapping, const min_max<texture_position_2D>& fragment,
+    image::wrap_method, image::filtering_method);

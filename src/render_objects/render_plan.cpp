@@ -143,3 +143,52 @@ render_plan render_plan::cornell_box(const extent_2D<uint32_t>& image_size)
     world.hierarchy = make_hierarchy(world.shapes);
     return render_plan{ image_size, cam, std::move(world) };
 }
+
+render_plan render_plan::grass_block(const extent_2D<uint32_t>& image_size)
+{
+    const camera cam = camera_create_info{
+        position_3D{ 2.f, 0.75f, -2.5f },
+        position_3D{ 0.f, 0.f, 0.f },
+        y_axis,
+        45.f,
+        image_size.aspect(),
+        0.05f,
+        { 0.f, 1.f }
+    };
+
+    scene world;
+    world.sky = world.add_image_texture(
+        world.add_image("textures/sky.jpg"), { { 0, 0 }, { 2880, 1440 } },
+        image::wrap_method::repeat, image::filtering_method::linear);
+
+    const uint32_t grass_image = world.add_image("textures/mc_grass.png");
+
+    const material bottom_face = world.add_diffuse_material(
+        world.add_image_texture(grass_image, { { 0, 0 }, { 16, 16 } },
+            image::wrap_method::repeat, image::filtering_method::nearest));
+    const material top_face = world.add_diffuse_material(
+        world.add_image_texture(grass_image, { { 0, 16 }, { 16, 32 } },
+            image::wrap_method::repeat, image::filtering_method::nearest));
+    const material side_face = world.add_diffuse_material(
+        world.add_image_texture(grass_image, { { 16, 0 }, { 32, 16 } },
+            image::wrap_method::repeat, image::filtering_method::nearest));
+
+    world.add_plane_shape(plane{ position_3D{ 0.f, -0.5f, 0.f }, y_axis }, {},
+        world.add_diffuse_material(
+            world.add_constant_texture({ color{ 0.7f, 1.f, 0.3f } })));
+
+    world.assemble_cuboid({
+        position_3D{ 0.f, 0.f, 0.f },
+        extent_3D{ 0.5f, 0.5f, 0.5f },
+        {},
+        bottom_face,
+        top_face,
+        side_face,
+        side_face,
+        side_face,
+        side_face,
+    });
+
+    world.hierarchy = make_hierarchy(world.shapes);
+    return render_plan{ image_size, cam, std::move(world) };
+}

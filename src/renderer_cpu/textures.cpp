@@ -25,12 +25,8 @@ static color color_on_texture(const constant_texture& in_constant_texture)
 
 static color color_on_texture(const scene& in_scene, const image_texture& in_image_texture, const barycentric_2D& in_mapping)
 {
-    barycentric_2D final_UV = in_mapping;
-    if (wrap(final_UV, in_image_texture.wrap))
-    {
-        return filter(in_scene.images[in_image_texture.image_index], final_UV, in_image_texture.filtering);
-    }
-    return black;
+    return filter(in_scene.images[in_image_texture.image_index], in_mapping, in_image_texture.image_fragment,
+        in_image_texture.wrap, in_image_texture.filtering);
 }
 
 static color color_on_texture(const noise_texture& in_noise_texture, const barycentric_2D& in_mapping, const position_3D& in_position)

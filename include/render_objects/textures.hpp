@@ -37,7 +37,7 @@ struct constant_texture
 struct image_texture
 {
     array_index image_index;
-    min_max<glm::uvec2> image_fragment;
+    min_max<texture_position_2D> image_fragment;
     image::wrap_method wrap;
     image::filtering_method filtering;
 };

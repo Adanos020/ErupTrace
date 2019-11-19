@@ -47,7 +47,7 @@ int main()
     try
     {
         const extent_2D<uint32_t> image_size = { 1600, 900 };
-        const render_plan plan = render_plan::test_scene(image_size);
+        const render_plan plan = render_plan::grass_block(image_size);
         const std::vector<rgba> image = renderer_cpu{ 500, THREAD_COUNT }.render_scene(plan);
         export_image(image, image_size, "test.png");
     }
