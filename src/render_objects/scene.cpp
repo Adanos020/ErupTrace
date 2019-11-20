@@ -191,9 +191,9 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
 
     this->assemble_quad({
         {
-            in_info.origin + (in_info.transform * displacement_3D{  width, -height, -depth }),
-            in_info.origin + (in_info.transform * displacement_3D{  width, -height,  depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width, -height,  depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ +width, -height, -depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ +width, -height, +depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width, -height, +depth }),
             in_info.origin + (in_info.transform * displacement_3D{ -width, -height, -depth }),
         },
         { -y_axis, -y_axis, -y_axis, -y_axis },
@@ -202,9 +202,9 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
     });
     this->assemble_quad({
         {
-            in_info.origin + (in_info.transform * displacement_3D{  width, height, -depth }),
-            in_info.origin + (in_info.transform * displacement_3D{  width, height,  depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width, height,  depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ +width, height, -depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ +width, height, +depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width, height, +depth }),
             in_info.origin + (in_info.transform * displacement_3D{ -width, height, -depth }),
         },
         { y_axis, y_axis, y_axis, y_axis },
@@ -213,9 +213,9 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
     });
     this->assemble_quad({
         {
-            in_info.origin + (in_info.transform * displacement_3D{ -width, -height,  depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width,  height,  depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width,  height, -depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width, -height, +depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width, +height, +depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width, +height, -depth }),
             in_info.origin + (in_info.transform * displacement_3D{ -width, -height, -depth }),
         },
         { -x_axis, -x_axis, -x_axis, -x_axis },
@@ -224,9 +224,9 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
     });
     this->assemble_quad({
         {
-            in_info.origin + (in_info.transform * displacement_3D{ width, -height,  depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ width,  height,  depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ width,  height, -depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ width, -height, +depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ width, +height, +depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ width, +height, -depth }),
             in_info.origin + (in_info.transform * displacement_3D{ width, -height, -depth }),
         },
         { x_axis, x_axis, x_axis, x_axis },
@@ -235,9 +235,9 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
     });
     this->assemble_quad({
         {
-            in_info.origin + (in_info.transform * displacement_3D{  width, -height, -depth }),
-            in_info.origin + (in_info.transform * displacement_3D{  width,  height, -depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width,  height, -depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ +width, -height, -depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ +width, +height, -depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width, +height, -depth }),
             in_info.origin + (in_info.transform * displacement_3D{ -width, -height, -depth }),
         },
         { -z_axis, -z_axis, -z_axis, -z_axis },
@@ -246,9 +246,9 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
     });
     this->assemble_quad({
         {
-            in_info.origin + (in_info.transform * displacement_3D{  width, -height, depth }),
-            in_info.origin + (in_info.transform * displacement_3D{  width,  height, depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width,  height, depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ +width, -height, depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ +width, +height, depth }),
+            in_info.origin + (in_info.transform * displacement_3D{ -width, +height, depth }),
             in_info.origin + (in_info.transform * displacement_3D{ -width, -height, depth }),
         },
         { z_axis, z_axis, z_axis, z_axis },

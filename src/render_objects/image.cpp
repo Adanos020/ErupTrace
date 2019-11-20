@@ -96,12 +96,8 @@ color filter_linear(const image& in_sampled_image, const min_max<texture_positio
         in_sampled_image.pixels[size_t(right + down * in_sampled_image.size.width)],
     };
 
-    const float U = normalize(
-        wrap(in_mapping.U, { 0.f, 1.f }, in_wrap_method),
-        { nearest.min.U, nearest.max.U });
-    const float V = normalize(
-        wrap(in_mapping.V, { 0.f, 1.f }, in_wrap_method),
-        { nearest.min.V, nearest.max.V });
+    const float U = normalize(wrap(in_mapping.U, { 0.f, 1.f }, in_wrap_method), { nearest.min.U, nearest.max.U });
+    const float V = normalize(wrap(in_mapping.V, { 0.f, 1.f }, in_wrap_method), { nearest.min.V, nearest.max.V });
     return bilerp(neighbors, U, V);
 }
 

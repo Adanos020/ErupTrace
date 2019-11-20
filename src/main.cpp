@@ -12,6 +12,7 @@
 #   define THREAD_COUNT 20
 #else
 #   define THREAD_COUNT 1
+#   define SINGLE_PIXEL_TEST
 #endif
 
 using namespace std::string_literals;
@@ -23,14 +24,13 @@ void export_image(const std::vector<rgba>& image, const extent_2D<uint32_t> imag
     constexpr uint32_t channels = 4;
     if (string_ends_with(path, ".png"))
     {
-        stbi_write_png(path.data(), image_size.width, image_size.height, channels,
-            image.data(), image_size.width * channels);
+        stbi_write_png(path.data(), image_size.width, image_size.height, channels, image.data(),
+            image_size.width * channels);
     }
     else if (string_ends_with(path, ".jpg"))
     {
         constexpr int32_t quality = 100;
-        stbi_write_jpg(path.data(), image_size.width, image_size.height, channels,
-            image.data(), quality);
+        stbi_write_jpg(path.data(), image_size.width, image_size.height, channels, image.data(), quality);
     }
     else
     {
@@ -48,8 +48,16 @@ int main()
     {
         const extent_2D<uint32_t> image_size = { 1600, 900 };
         const render_plan plan = render_plan::grass_block(image_size);
-        const std::vector<rgba> image = renderer_cpu{ 500, THREAD_COUNT }.render_scene(plan);
+        renderer_cpu renderer{ 500, THREAD_COUNT };
+#ifdef SINGLE_PIXEL_TEST
+        const pixel_position pixel_pos = { 790, 290 };
+        const color pixel = renderer.render_single_pixel(plan, pixel_pos);
+        std::cout << "Rendered color {" << pixel.r << " " << pixel.g << " " << pixel.b
+            << "} at pixel {" << pixel_pos.x << " " << pixel_pos.y << "}" << std::endl;
+#else
+        const std::vector<rgba> image = renderer.render_scene(plan);
         export_image(image, image_size, "test.png");
+#endif
     }
     catch (const std::exception& e)
     {

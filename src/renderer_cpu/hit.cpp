@@ -110,13 +110,13 @@ static auto ray_hits_children_of(const ray& in_ray, const BIH_node& in_node, con
         min_max<float> distances;
     } hit_1, hit_2;
 
-    if (distances_to_splitting_planes[node_1] > in_distances.min)
+    if (distances_to_splitting_planes[node_1] >= in_distances.min)
     {
         hit_1.occurred = true;
         hit_1.is_left_node = node_1 == 0;
         hit_1.distances = { in_distances.min, std::min(in_distances.max, distances_to_splitting_planes[node_1]) };
     }
-    if (distances_to_splitting_planes[node_2] < in_distances.max)
+    if (distances_to_splitting_planes[node_2] <= in_distances.max)
     {
         hit_2.occurred = true;
         hit_2.is_left_node = node_2 == 0;

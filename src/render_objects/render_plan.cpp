@@ -158,7 +158,7 @@ render_plan render_plan::grass_block(const extent_2D<uint32_t>& image_size)
 
     scene world;
     world.sky = world.add_image_texture(
-        world.add_image("textures/sky.jpg"), { { 0, 0 }, { 2880, 1440 } },
+        world.add_image("textures/stars_milky_way.jpg"), { { 0, 0 }, { 2880, 1440 } },
         image::wrap_method::repeat, image::filtering_method::linear);
 
     const uint32_t grass_image = world.add_image("textures/mc_grass.png");
@@ -188,6 +188,10 @@ render_plan render_plan::grass_block(const extent_2D<uint32_t>& image_size)
         side_face,
         side_face,
     });
+ 
+    world.add_sphere_shape(sphere{ position_3D{ 0.5f, 2.f, 0.5f }, 0.7f }, y_axis,
+        world.add_emit_light_material(
+            world.add_constant_texture(color{ 1.f, 1.f, 0.5f }), 1.5f));
 
     world.hierarchy = make_hierarchy(world.shapes);
     return render_plan{ image_size, cam, std::move(world) };
