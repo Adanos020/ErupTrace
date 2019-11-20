@@ -26,4 +26,5 @@ struct cuboid_assembly_info
     material right_face;
     material front_face;
     material back_face;
+    bool face_inwards = false;
 };

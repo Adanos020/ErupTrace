@@ -188,6 +188,7 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
     const float width = in_info.half_size.width;
     const float height = in_info.half_size.height;
     const float depth = in_info.half_size.depth;
+    const float face_sign = in_info.face_inwards ? -1.f : 1.f;
 
     this->assemble_quad({
         {
@@ -196,7 +197,7 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
             in_info.origin + (in_info.transform * displacement_3D{ -width, -height, +depth }),
             in_info.origin + (in_info.transform * displacement_3D{ -width, -height, -depth }),
         },
-        { -y_axis, -y_axis, -y_axis, -y_axis },
+        { -y_axis * face_sign, -y_axis * face_sign, -y_axis * face_sign, -y_axis * face_sign },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
         in_info.bottom_face,
     });
@@ -207,7 +208,7 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
             in_info.origin + (in_info.transform * displacement_3D{ -width, height, +depth }),
             in_info.origin + (in_info.transform * displacement_3D{ -width, height, -depth }),
         },
-        { y_axis, y_axis, y_axis, y_axis },
+        { y_axis * face_sign, y_axis * face_sign, y_axis * face_sign, y_axis * face_sign },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
         in_info.top_face,
     });
@@ -218,7 +219,7 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
             in_info.origin + (in_info.transform * displacement_3D{ -width, +height, -depth }),
             in_info.origin + (in_info.transform * displacement_3D{ -width, -height, -depth }),
         },
-        { -x_axis, -x_axis, -x_axis, -x_axis },
+        { -x_axis * face_sign, -x_axis * face_sign, -x_axis * face_sign, -x_axis * face_sign },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
         in_info.left_face,
     });
@@ -229,7 +230,7 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
             in_info.origin + (in_info.transform * displacement_3D{ width, +height, -depth }),
             in_info.origin + (in_info.transform * displacement_3D{ width, -height, -depth }),
         },
-        { x_axis, x_axis, x_axis, x_axis },
+        { x_axis * face_sign, x_axis * face_sign, x_axis * face_sign, x_axis * face_sign },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
         in_info.right_face,
     });
@@ -240,7 +241,7 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
             in_info.origin + (in_info.transform * displacement_3D{ -width, +height, -depth }),
             in_info.origin + (in_info.transform * displacement_3D{ -width, -height, -depth }),
         },
-        { -z_axis, -z_axis, -z_axis, -z_axis },
+        { -z_axis * face_sign, -z_axis * face_sign, -z_axis * face_sign, -z_axis * face_sign },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
         in_info.front_face,
     });
@@ -251,7 +252,7 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
             in_info.origin + (in_info.transform * displacement_3D{ -width, +height, depth }),
             in_info.origin + (in_info.transform * displacement_3D{ -width, -height, depth }),
         },
-        { z_axis, z_axis, z_axis, z_axis },
+        { z_axis * face_sign, z_axis * face_sign, z_axis * face_sign, z_axis * face_sign },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
         in_info.back_face,
     });
@@ -337,6 +338,13 @@ texture scene::add_image_texture(const array_index in_index, const min_max<textu
     const image::wrap_method in_wrap, const image::filtering_method in_filtering)
 {
     return this->add_image_texture(image_texture{ in_index, in_image_fragment, in_wrap, in_filtering });
+}
+
+texture scene::add_image_texture(const array_index in_index, const image::wrap_method in_wrap,
+    const image::filtering_method in_filtering)
+{
+    const extent_2D<uint32_t>& size = this->images[in_index].size;
+    return this->add_image_texture(in_index, { { 0.f, 0.f }, { size.width, size.height } }, in_wrap, in_filtering);
 }
 
 texture scene::add_noise_texture(const noise_texture& in_texture)
