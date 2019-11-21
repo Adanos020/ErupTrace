@@ -47,7 +47,7 @@ int main()
     try
     {
         const extent_2D<uint32_t> image_size = { 1600, 900 };
-        const render_plan plan = render_plan::grass_block(image_size);
+        const render_plan plan = render_plan::test_scene(image_size);
         renderer_cpu renderer{ 500, THREAD_COUNT };
 #ifdef SINGLE_PIXEL_TEST
         const pixel_position pixel_pos = { 790, 290 };

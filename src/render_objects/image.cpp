@@ -110,8 +110,8 @@ color filter_nearest(const image& in_sampled_image, const min_max<texture_positi
         const uint32_t width = in_image_fragment.max.s - in_image_fragment.min.s;
         const uint32_t height = in_image_fragment.max.t - in_image_fragment.min.t;
         const pixel_position nearest = {
-            in_image_fragment.min.s + final_mapping.U * (width - 1),
-            in_image_fragment.min.t + final_mapping.V * (height - 1),
+            in_image_fragment.min.s + final_mapping.U * width,
+            in_image_fragment.min.t + final_mapping.V * height,
         };
         return in_sampled_image.pixels[nearest.x + (nearest.y * in_sampled_image.size.width)];
     }

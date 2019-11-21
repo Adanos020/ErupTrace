@@ -190,69 +190,76 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
     const float depth = in_info.half_size.depth;
     const float face_sign = in_info.face_inwards ? -1.f : 1.f;
 
+    const direction_3D normal_d = (-y_axis * in_info.rotation) * face_sign;
+    const direction_3D normal_u = (+y_axis * in_info.rotation) * face_sign;
+    const direction_3D normal_l = (-x_axis * in_info.rotation) * face_sign;
+    const direction_3D normal_r = (+x_axis * in_info.rotation) * face_sign;
+    const direction_3D normal_f = (-z_axis * in_info.rotation) * face_sign;
+    const direction_3D normal_b = (+z_axis * in_info.rotation) * face_sign;
+
     this->assemble_quad({
         {
-            in_info.origin + (in_info.transform * displacement_3D{ +width, -height, -depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ +width, -height, +depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width, -height, +depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width, -height, -depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ +width, -height, -depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ +width, -height, +depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ -width, -height, +depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ -width, -height, -depth }),
         },
-        { -y_axis * face_sign, -y_axis * face_sign, -y_axis * face_sign, -y_axis * face_sign },
+        { normal_d, normal_d, normal_d, normal_d },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
         in_info.bottom_face,
     });
     this->assemble_quad({
         {
-            in_info.origin + (in_info.transform * displacement_3D{ +width, height, -depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ +width, height, +depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width, height, +depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width, height, -depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ +width, height, -depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ +width, height, +depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ -width, height, +depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ -width, height, -depth }),
         },
-        { y_axis * face_sign, y_axis * face_sign, y_axis * face_sign, y_axis * face_sign },
+        { normal_u, normal_u, normal_u, normal_u },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
         in_info.top_face,
     });
     this->assemble_quad({
         {
-            in_info.origin + (in_info.transform * displacement_3D{ -width, -height, +depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width, +height, +depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width, +height, -depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width, -height, -depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ -width, -height, +depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ -width, +height, +depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ -width, +height, -depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ -width, -height, -depth }),
         },
-        { -x_axis * face_sign, -x_axis * face_sign, -x_axis * face_sign, -x_axis * face_sign },
+        { normal_l, normal_l, normal_l, normal_l },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
         in_info.left_face,
     });
     this->assemble_quad({
         {
-            in_info.origin + (in_info.transform * displacement_3D{ width, -height, +depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ width, +height, +depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ width, +height, -depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ width, -height, -depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ width, -height, +depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ width, +height, +depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ width, +height, -depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ width, -height, -depth }),
         },
-        { x_axis * face_sign, x_axis * face_sign, x_axis * face_sign, x_axis * face_sign },
+        { normal_r, normal_r, normal_r, normal_r },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
         in_info.right_face,
     });
     this->assemble_quad({
         {
-            in_info.origin + (in_info.transform * displacement_3D{ +width, -height, -depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ +width, +height, -depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width, +height, -depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width, -height, -depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ +width, -height, -depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ +width, +height, -depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ -width, +height, -depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ -width, -height, -depth }),
         },
-        { -z_axis * face_sign, -z_axis * face_sign, -z_axis * face_sign, -z_axis * face_sign },
+        { normal_f, normal_f, normal_f, normal_f },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
         in_info.front_face,
     });
     this->assemble_quad({
         {
-            in_info.origin + (in_info.transform * displacement_3D{ +width, -height, depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ +width, +height, depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width, +height, depth }),
-            in_info.origin + (in_info.transform * displacement_3D{ -width, -height, depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ +width, -height, depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ +width, +height, depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ -width, +height, depth }),
+            in_info.origin + (in_info.rotation * displacement_3D{ -width, -height, depth }),
         },
-        { z_axis * face_sign, z_axis * face_sign, z_axis * face_sign, z_axis * face_sign },
+        { normal_b, normal_b, normal_b, normal_b },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
         in_info.back_face,
     });
