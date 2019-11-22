@@ -29,7 +29,9 @@ static color color_on_texture(const scene& in_scene, const image_texture& in_ima
     const min_max<texture_position_2D>& image_fragment = in_image_texture.image_fragment;
     switch (in_image_texture.filtering)
     {
+        case image::filtering_method::catrom:  return filter_catrom(sampled_image, image_fragment, in_mapping, in_image_texture.wrap);
         case image::filtering_method::cubic:   return filter_cubic(sampled_image, image_fragment, in_mapping, in_image_texture.wrap);
+        case image::filtering_method::hermite: return filter_hermite(sampled_image, image_fragment, in_mapping, in_image_texture.wrap);
         case image::filtering_method::linear:  return filter_linear(sampled_image, image_fragment, in_mapping, in_image_texture.wrap);
         case image::filtering_method::nearest: return filter_nearest(sampled_image, image_fragment, in_mapping, in_image_texture.wrap);
     }

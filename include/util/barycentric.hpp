@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 #include <tuple>
 
 struct barycentric_2D
@@ -15,6 +17,11 @@ struct barycentric_2D
         : barycentric_2D(pair.first, pair.second)
     {
     }
+
+    constexpr operator glm::vec2() const
+    {
+        return { this->U, this->V };
+    }
 };
 
 struct barycentric_3D
@@ -29,5 +36,10 @@ struct barycentric_3D
     constexpr barycentric_3D(const std::tuple<float, float, float>& triplet)
         : barycentric_3D(std::get<0>(triplet), std::get<1>(triplet), std::get<2>(triplet))
     {
+    }
+
+    constexpr operator glm::vec3() const
+    {
+        return { this->U, this->V, this->W };
     }
 };

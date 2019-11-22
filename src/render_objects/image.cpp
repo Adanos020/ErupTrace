@@ -13,23 +13,23 @@ static barycentric_2D wrap(const barycentric_2D& in_mapping, const image::wrap_m
     {
     case image::wrap_method::clamp_to_border:
         return barycentric_2D{
-            wrap_clamp_to_border(in_mapping.U, { 0.f, 1.f }),
-            wrap_clamp_to_border(in_mapping.V, { 0.f, 1.f }),
+            (in_mapping.U < 0.f || in_mapping.U > 1.f) ? -1.f : in_mapping.U,
+            (in_mapping.V < 0.f || in_mapping.V > 1.f) ? -1.f : in_mapping.V,
         };
     case image::wrap_method::clamp_to_edge:
         return barycentric_2D{
-            wrap_clamp_to_edge(in_mapping.U, { 0.f, 1.f }),
-            wrap_clamp_to_edge(in_mapping.V, { 0.f, 1.f }),
+            glm::clamp(in_mapping.U, 0.f, 1.f),
+            glm::clamp(in_mapping.V, 0.f, 1.f),
         };
     case image::wrap_method::mirrored_repeat:
         return barycentric_2D{
-            wrap_mirrored_repeat(in_mapping.U, { 0.f, 1.f }),
-            wrap_mirrored_repeat(in_mapping.V, { 0.f, 1.f }),
+            mirrored_repeat(in_mapping.U, { 0.f, 1.f }),
+            mirrored_repeat(in_mapping.V, { 0.f, 1.f }),
         };
     case image::wrap_method::repeat:
         return barycentric_2D{
-            wrap_repeat(in_mapping.U, { 0.f, 1.f }),
-            wrap_repeat(in_mapping.V, { 0.f, 1.f }),
+            repeat(in_mapping.U, { 0.f, 1.f }),
+            repeat(in_mapping.V, { 0.f, 1.f }),
         };
     }
     return barycentric_2D{ -1.f, -1.f };
@@ -39,65 +39,122 @@ static float wrap(const float in_value, const min_max<float>& in_range, const im
 {
     switch (in_wrap_method)
     {
-        case image::wrap_method::clamp_to_border: return wrap_clamp_to_border(in_value, in_range);
-        case image::wrap_method::clamp_to_edge:   return wrap_clamp_to_edge(in_value, in_range);
-        case image::wrap_method::mirrored_repeat: return wrap_mirrored_repeat(in_value, in_range);
-        case image::wrap_method::repeat:          return wrap_repeat(in_value, in_range);
+        case image::wrap_method::clamp_to_border: return (in_value < in_range.min || in_value > in_range.max - 1.f) ? -1.f : in_value;
+        case image::wrap_method::clamp_to_edge:   return glm::clamp(in_value, in_range.min, in_range.max - 1.f);
+        case image::wrap_method::mirrored_repeat: return mirrored_repeat(in_value, in_range);
+        case image::wrap_method::repeat:          return repeat(in_value, in_range);
     }
     return -1.f;
 }
 
 // Filtering
 
+static auto pick_4x4_neighbors_and_interpolants(const image& in_sampled_image,
+    const min_max<texture_position_2D>& in_image_fragment, const barycentric_2D& in_mapping,
+    const image::wrap_method in_wrap_method)
+{
+    const float fragment_width = in_image_fragment.max.s - in_image_fragment.min.s;
+    const float fragment_height = in_image_fragment.max.t - in_image_fragment.min.t;
+
+    const auto wrap_s_in_fragment = [&](const float s)
+    { return wrap(s, { in_image_fragment.min.s, in_image_fragment.max.s }, in_wrap_method); };
+    const auto wrap_t_in_fragment = [&](const float t)
+    { return wrap(t, { in_image_fragment.min.t, in_image_fragment.max.t }, in_wrap_method); };
+
+    const texture_position_2D texcoord = {
+        wrap_s_in_fragment(in_image_fragment.min.s - 0.5f + (in_mapping.U * fragment_width)),
+        wrap_t_in_fragment(in_image_fragment.min.t - 0.5f + (in_mapping.V * fragment_height)),
+    };
+
+    float s_int, t_int;
+    const float s_fract = glm::modf(texcoord.s, s_int);
+    const float t_fract = glm::modf(texcoord.t, t_int);
+
+    std::array<float, 8> neighbors;
+    for (size_t i = 0; i < 4; ++i)
+    {
+        neighbors[i + 0] = wrap_s_in_fragment(s_int + float(i) - 1.f);
+        neighbors[i + 4] = wrap_t_in_fragment(t_int + float(i) - 1.f);
+    }
+
+    std::array<color, 16> texels;
+    for (size_t t = 0; t < 4; ++t)
+    {
+        for (size_t s = 0; s < 4; ++s)
+        {
+            const size_t index = neighbors[s] + neighbors[t + 4] * in_sampled_image.size.width;
+            texels[s + t * 4] = (neighbors[s] < 0.f || neighbors[t + 4] < 0.f) ? black : in_sampled_image.pixels[index];
+        }
+    }
+
+    return std::make_tuple(texels, s_fract, t_fract);
+}
+
+static auto pick_2x2_neighbors_and_interpolants(const image& in_sampled_image,
+    const min_max<texture_position_2D>& in_image_fragment, const barycentric_2D& in_mapping,
+    const image::wrap_method in_wrap_method)
+{
+    const float fragment_width = in_image_fragment.max.s - in_image_fragment.min.s;
+    const float fragment_height = in_image_fragment.max.t - in_image_fragment.min.t;
+
+    const auto wrap_s_in_fragment = [&](const float s)
+    { return wrap(s, { in_image_fragment.min.s, in_image_fragment.max.s }, in_wrap_method); };
+    const auto wrap_t_in_fragment = [&](const float t)
+    { return wrap(t, { in_image_fragment.min.t, in_image_fragment.max.t }, in_wrap_method); };
+
+    const texture_position_2D texcoord = {
+        wrap_s_in_fragment(in_image_fragment.min.s - 0.5f + (in_mapping.U * fragment_width)),
+        wrap_t_in_fragment(in_image_fragment.min.t - 0.5f + (in_mapping.V * fragment_height)),
+    };
+
+    float s_int, t_int;
+    const float s_fract = glm::modf(texcoord.s, s_int);
+    const float t_fract = glm::modf(texcoord.t, t_int);
+
+    const float left = wrap_s_in_fragment(s_int);
+    const float up = wrap_t_in_fragment(t_int);
+    const float right = wrap_s_in_fragment(left + 1.f);
+    const float down = wrap_t_in_fragment(up + 1.f);
+
+    const std::array<color, 4> texels = {
+        (left  < 0.f || up   < 0.f) ? black : in_sampled_image.pixels[size_t(left + up * in_sampled_image.size.width)],
+        (right < 0.f || up   < 0.f) ? black : in_sampled_image.pixels[size_t(right + up * in_sampled_image.size.width)],
+        (left  < 0.f || down < 0.f) ? black : in_sampled_image.pixels[size_t(left + down * in_sampled_image.size.width)],
+        (right < 0.f || down < 0.f) ? black : in_sampled_image.pixels[size_t(right + down * in_sampled_image.size.width)],
+    };
+
+    return std::make_tuple(texels, s_fract, t_fract);
+}
+
+color filter_catrom(const image& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
+    const barycentric_2D& in_mapping, const image::wrap_method in_wrap_method)
+{
+    const auto [neighbors, U, V] = pick_4x4_neighbors_and_interpolants(
+        in_sampled_image, in_image_fragment, in_mapping, in_wrap_method);
+    return glm::clamp(bicatrom(neighbors, U, V), black, white);
+}
+
 color filter_cubic(const image& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
     const barycentric_2D& in_mapping, const image::wrap_method in_wrap_method)
 {
-    const std::array<color, 16> neighbors = {
+    const auto [neighbors, U, V] = pick_4x4_neighbors_and_interpolants(
+        in_sampled_image, in_image_fragment, in_mapping, in_wrap_method);
+    return glm::clamp(bicubic(neighbors, U, V), black, white);
+}
 
-    };
-    const float U = in_mapping.U;
-    const float V = in_mapping.V;
-    return bicubic(neighbors, U, V);
+color filter_hermite(const image& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
+    const barycentric_2D& in_mapping, const image::wrap_method in_wrap_method)
+{
+    const auto [neighbors, U, V] = pick_4x4_neighbors_and_interpolants(
+        in_sampled_image, in_image_fragment, in_mapping, in_wrap_method);
+    return glm::clamp(bihermite(neighbors, U, V), black, white);
 }
 
 color filter_linear(const image& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
     const barycentric_2D& in_mapping, const image::wrap_method in_wrap_method)
 {
-    const float width = in_image_fragment.max.s - in_image_fragment.min.s;
-    const float height = in_image_fragment.max.t - in_image_fragment.min.t;
-    const float inverse_width = 1.f / (width - 1.f);
-    const float inverse_height = 1.f / (height - 1.f);
-
-    const texture_position_2D texcoord = {
-        in_image_fragment.min.s + in_mapping.U * (width - 1),
-        in_image_fragment.min.t + in_mapping.V * (height - 1),
-    };
-
-    const float left = wrap(glm::floor(texcoord.s), { in_image_fragment.min.s, in_image_fragment.max.s }, in_wrap_method);
-    const float up = wrap(glm::floor(texcoord.t), { in_image_fragment.min.t, in_image_fragment.max.t }, in_wrap_method);
-    const float right = wrap(left + 1.f, { in_image_fragment.min.s, in_image_fragment.max.s }, in_wrap_method);
-    const float down = wrap(up + 1.f, { in_image_fragment.min.t, in_image_fragment.max.t }, in_wrap_method);
-
-    const min_max<barycentric_2D> nearest = {
-        barycentric_2D{
-            (left - in_image_fragment.min.s) * inverse_width,
-            (up - in_image_fragment.min.t) * inverse_height,
-        },
-        barycentric_2D{
-            (right - in_image_fragment.min.s) * inverse_width,
-            (down - in_image_fragment.min.t) * inverse_height,
-        },
-    };
-
-    const std::array<color, 4> neighbors = {
-        in_sampled_image.pixels[size_t(left + up * in_sampled_image.size.width)],
-        in_sampled_image.pixels[size_t(right + up * in_sampled_image.size.width)],
-        in_sampled_image.pixels[size_t(left + down * in_sampled_image.size.width)],
-        in_sampled_image.pixels[size_t(right + down * in_sampled_image.size.width)],
-    };
-
-    const float U = normalize(wrap(in_mapping.U, { 0.f, 1.f }, in_wrap_method), { nearest.min.U, nearest.max.U });
-    const float V = normalize(wrap(in_mapping.V, { 0.f, 1.f }, in_wrap_method), { nearest.min.V, nearest.max.V });
+    const auto [neighbors, U, V] = pick_2x2_neighbors_and_interpolants(
+        in_sampled_image, in_image_fragment, in_mapping, in_wrap_method);
     return bilerp(neighbors, U, V);
 }
 

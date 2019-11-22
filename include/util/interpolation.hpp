@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtx/spline.hpp>
 
 #include <array>
 
@@ -13,9 +14,33 @@ inline static T bilerp(const std::array<T, 4>& in_values, const float in_u, cons
 }
 
 template<typename T = float>
+inline static T bicatrom(const std::array<T, 16>& in_values, const float in_u, const float in_v)
+{
+    const T v_1 = glm::catmullRom(in_values[0],  in_values[1],  in_values[2],  in_values[3],  in_u);
+    const T v_2 = glm::catmullRom(in_values[4],  in_values[5],  in_values[6],  in_values[7],  in_u);
+    const T v_3 = glm::catmullRom(in_values[8],  in_values[9],  in_values[10], in_values[11], in_u);
+    const T v_4 = glm::catmullRom(in_values[12], in_values[13], in_values[14], in_values[15], in_u);
+    return glm::catmullRom(v_1, v_2, v_3, v_4, in_v);
+}
+
+template<typename T = float>
 inline static T bicubic(const std::array<T, 16>& in_values, const float in_u, const float in_v)
 {
-    return T{ 0.f };
+    const T v_1 = glm::cubic(in_values[0],  in_values[1],  in_values[2],  in_values[3],  in_u);
+    const T v_2 = glm::cubic(in_values[4],  in_values[5],  in_values[6],  in_values[7],  in_u);
+    const T v_3 = glm::cubic(in_values[8],  in_values[9],  in_values[10], in_values[11], in_u);
+    const T v_4 = glm::cubic(in_values[12], in_values[13], in_values[14], in_values[15], in_u);
+    return glm::cubic(v_1, v_2, v_3, v_4, in_v);
+}
+
+template<typename T = float>
+inline static T bihermite(const std::array<T, 16>& in_values, const float in_u, const float in_v)
+{
+    const T v_1 = glm::hermite(in_values[0],  in_values[1],  in_values[2],  in_values[3],  in_u);
+    const T v_2 = glm::hermite(in_values[4],  in_values[5],  in_values[6],  in_values[7],  in_u);
+    const T v_3 = glm::hermite(in_values[8],  in_values[9],  in_values[10], in_values[11], in_u);
+    const T v_4 = glm::hermite(in_values[12], in_values[13], in_values[14], in_values[15], in_u);
+    return glm::hermite(v_1, v_2, v_3, v_4, in_v);
 }
 
 template<typename T = float>

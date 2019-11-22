@@ -99,7 +99,7 @@ render_plan render_plan::cornell_box(const extent_2D<uint32_t>& image_size)
 
     scene world;
     world.sky = world.add_constant_texture(black);
-    const material no_wall = world.add_dielectric_material(0.f, world.add_constant_texture(color{ 1.f }));
+    const material no_wall = world.add_dielectric_material(1.f, world.add_constant_texture(color{ 1.f }));
     const material red_wall = world.add_diffuse_material(world.add_constant_texture(color{ 0.65f, 0.05f, 0.05f }));
     const material white_wall = world.add_diffuse_material(world.add_constant_texture(color{ 0.73f, 0.73f, 0.73f }));
     const material green_wall = world.add_diffuse_material(world.add_constant_texture(color{ 0.12f, 0.45f, 0.15f }));
@@ -145,7 +145,7 @@ render_plan render_plan::grass_block(const extent_2D<uint32_t>& image_size)
 
     scene world;
     world.sky = world.add_image_texture(
-        world.add_image("textures/stars_milky_way.jpg"), { { 0, 0 }, { 2880, 1440 } },
+        world.add_image("textures/sky.jpg"), { { 0, 0 }, { 2880, 1440 } },
         image::wrap_method::repeat, image::filtering_method::linear);
 
     world.add_plane_shape(plane{ position_3D{ 0.f, -0.5f, 0.f }, y_axis }, {},
@@ -156,13 +156,13 @@ render_plan render_plan::grass_block(const extent_2D<uint32_t>& image_size)
 
     const material bottom_face = world.add_diffuse_material(
         world.add_image_texture(grass_image, { { 0, 0 }, { 16, 16 } },
-            image::wrap_method::repeat, image::filtering_method::nearest));
+            image::wrap_method::clamp_to_edge, image::filtering_method::nearest));
     const material top_face = world.add_diffuse_material(
         world.add_image_texture(grass_image, { { 0, 16 }, { 16, 32 } },
-            image::wrap_method::repeat, image::filtering_method::nearest));
+            image::wrap_method::clamp_to_edge, image::filtering_method::nearest));
     const material side_face = world.add_diffuse_material(
         world.add_image_texture(grass_image, { { 16, 0 }, { 32, 16 } },
-            image::wrap_method::repeat, image::filtering_method::nearest));
+            image::wrap_method::clamp_to_edge, image::filtering_method::nearest));
 
     world.assemble_cuboid({
         position_3D{ 0.f, 0.f, 0.f },
@@ -170,10 +170,6 @@ render_plan render_plan::grass_block(const extent_2D<uint32_t>& image_size)
         glm::quat{ glm::vec3{ 0.f, 0.f, 0.f } },
         bottom_face, top_face, side_face, side_face, side_face, side_face,
     });
- 
-    world.add_sphere_shape(sphere{ position_3D{ 0.5f, 2.f, 0.5f }, 0.7f }, y_axis,
-        world.add_emit_light_material(
-            world.add_constant_texture(color{ 1.f, 1.f, 0.5f }), 1.5f));
 
     world.hierarchy = make_hierarchy(world.shapes);
     return render_plan{ image_size, cam, std::move(world) };

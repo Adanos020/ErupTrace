@@ -24,21 +24,7 @@ inline static T map(const T in_value, const from_to<min_max<T>>& in_ranges)
 }
 
 template<typename T>
-inline static T wrap_clamp_to_border(const T in_value, const min_max<T>& in_range)
-{
-    static_assert(std::is_floating_point_v<T>);
-    return (in_value < in_range.min || in_value > in_range.max) ? -1.f : in_value;
-}
-
-template<typename T>
-inline static T wrap_clamp_to_edge(const T in_value, const min_max<T>& in_range)
-{
-    static_assert(std::is_floating_point_v<T>);
-    return glm::clamp(in_value, in_range.min, in_range.max);
-}
-
-template<typename T>
-inline static T wrap_mirrored_repeat(const T in_value, const min_max<T>& in_range)
+inline static T mirrored_repeat(const T in_value, const min_max<T>& in_range)
 {
     static_assert(std::is_floating_point_v<T>);
 
@@ -52,7 +38,7 @@ inline static T wrap_mirrored_repeat(const T in_value, const min_max<T>& in_rang
 }
 
 template<typename T>
-inline static T wrap_repeat(const T in_value, const min_max<T>& in_range)
+inline static T repeat(const T in_value, const min_max<T>& in_range)
 {
     static_assert(std::is_floating_point_v<T>);
     return map(glm::fract(normalize(in_value, in_range)), { { 0.f, 1.f }, in_range });
