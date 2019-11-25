@@ -10,6 +10,12 @@ template<typename T = float>
 static constexpr T infinity = std::numeric_limits<T>::infinity();
 
 template<typename T>
+inline static bool is_clamped(const T in_value, const min_max<T>& in_range)
+{
+    return in_value >= in_range.min && in_value <= in_range.max;
+}
+
+template<typename T>
 inline static T normalize(const T in_value, const min_max<T>& in_range)
 {
     static_assert(std::is_floating_point_v<T>);
@@ -29,17 +35,18 @@ inline static T mirrored_repeat(const T in_value, const min_max<T>& in_range)
     static_assert(std::is_floating_point_v<T>);
 
     float i;
-    const float final_value = glm::modf(in_value, i);
+    const float fract = glm::modf(normalize(in_value, in_range), i);
+    const float range_size = in_range.max - in_range.min;
     if (glm::mod(i, 2.f) != 0.f)
     {
-        return 1.f - final_value;
+        return in_range.min + ((1.f - fract) * range_size);
     }
-    return final_value;
+    return in_range.min + (fract * range_size);
 }
 
 template<typename T>
 inline static T repeat(const T in_value, const min_max<T>& in_range)
 {
     static_assert(std::is_floating_point_v<T>);
-    return map(glm::fract(normalize(in_value, in_range)), { { 0.f, 1.f }, in_range });
+    return in_range.min + glm::mod(in_value - in_range.min, in_range.max - in_range.min);
 }

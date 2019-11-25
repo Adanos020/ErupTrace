@@ -13,8 +13,8 @@ static barycentric_2D wrap(const barycentric_2D& in_mapping, const image::wrap_m
     {
     case image::wrap_method::clamp_to_border:
         return barycentric_2D{
-            (in_mapping.U < 0.f || in_mapping.U > 1.f) ? -1.f : in_mapping.U,
-            (in_mapping.V < 0.f || in_mapping.V > 1.f) ? -1.f : in_mapping.V,
+            !is_clamped(in_mapping.U, { 0.f, 1.f }) ? -1.f : in_mapping.U,
+            !is_clamped(in_mapping.V, { 0.f, 1.f }) ? -1.f : in_mapping.V,
         };
     case image::wrap_method::clamp_to_edge:
         return barycentric_2D{
@@ -53,13 +53,15 @@ static auto pick_4x4_neighbors_and_interpolants(const image& in_sampled_image,
     const min_max<texture_position_2D>& in_image_fragment, const barycentric_2D& in_mapping,
     const image::wrap_method in_wrap_method)
 {
+    const auto wrap_s_in_fragment = [&](const float s) {
+        return wrap(s, { in_image_fragment.min.s, in_image_fragment.max.s }, in_wrap_method);
+    };
+    const auto wrap_t_in_fragment = [&](const float t) {
+        return wrap(t, { in_image_fragment.min.t, in_image_fragment.max.t }, in_wrap_method);
+    };
+
     const float fragment_width = in_image_fragment.max.s - in_image_fragment.min.s;
     const float fragment_height = in_image_fragment.max.t - in_image_fragment.min.t;
-
-    const auto wrap_s_in_fragment = [&](const float s)
-    { return wrap(s, { in_image_fragment.min.s, in_image_fragment.max.s }, in_wrap_method); };
-    const auto wrap_t_in_fragment = [&](const float t)
-    { return wrap(t, { in_image_fragment.min.t, in_image_fragment.max.t }, in_wrap_method); };
 
     const texture_position_2D texcoord = {
         wrap_s_in_fragment(in_image_fragment.min.s - 0.5f + (in_mapping.U * fragment_width)),
@@ -73,17 +75,19 @@ static auto pick_4x4_neighbors_and_interpolants(const image& in_sampled_image,
     std::array<float, 8> neighbors;
     for (size_t i = 0; i < 4; ++i)
     {
-        neighbors[i + 0] = wrap_s_in_fragment(s_int + float(i) - 1.f);
-        neighbors[i + 4] = wrap_t_in_fragment(t_int + float(i) - 1.f);
+        neighbors[i + 0] = wrap_s_in_fragment(s_int - 1.f + float(i));
+        neighbors[i + 4] = wrap_t_in_fragment(t_int - 1.f + float(i));
     }
 
     std::array<color, 16> texels;
-    for (size_t t = 0; t < 4; ++t)
+    for (size_t t = 4; t < 8; ++t)
     {
         for (size_t s = 0; s < 4; ++s)
         {
-            const size_t index = neighbors[s] + neighbors[t + 4] * in_sampled_image.size.width;
-            texels[s + t * 4] = (neighbors[s] < 0.f || neighbors[t + 4] < 0.f) ? black : in_sampled_image.pixels[index];
+            const size_t pixel_index = neighbors[s] + neighbors[t] * in_sampled_image.size.width;
+            const size_t texel_index = s + ((t - 4) * 4);
+            texels[texel_index] = (neighbors[s] < 0.f || neighbors[t] < 0.f) ?
+                black : in_sampled_image.pixels[pixel_index];
         }
     }
 
@@ -94,13 +98,15 @@ static auto pick_2x2_neighbors_and_interpolants(const image& in_sampled_image,
     const min_max<texture_position_2D>& in_image_fragment, const barycentric_2D& in_mapping,
     const image::wrap_method in_wrap_method)
 {
+    const auto wrap_s_in_fragment = [&](const float s) {
+        return wrap(s, { in_image_fragment.min.s, in_image_fragment.max.s }, in_wrap_method);
+    };
+    const auto wrap_t_in_fragment = [&](const float t) {
+        return wrap(t, { in_image_fragment.min.t, in_image_fragment.max.t }, in_wrap_method);
+    };
+
     const float fragment_width = in_image_fragment.max.s - in_image_fragment.min.s;
     const float fragment_height = in_image_fragment.max.t - in_image_fragment.min.t;
-
-    const auto wrap_s_in_fragment = [&](const float s)
-    { return wrap(s, { in_image_fragment.min.s, in_image_fragment.max.s }, in_wrap_method); };
-    const auto wrap_t_in_fragment = [&](const float t)
-    { return wrap(t, { in_image_fragment.min.t, in_image_fragment.max.t }, in_wrap_method); };
 
     const texture_position_2D texcoord = {
         wrap_s_in_fragment(in_image_fragment.min.s - 0.5f + (in_mapping.U * fragment_width)),
