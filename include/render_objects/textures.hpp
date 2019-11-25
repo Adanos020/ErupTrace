@@ -4,7 +4,6 @@
 #include <util/colors.hpp>
 #include <util/numeric.hpp>
 #include <util/pairs.hpp>
-#include <util/transform.hpp>
 #include <util/sizes.hpp>
 
 enum class texture_type
@@ -24,9 +23,8 @@ struct texture
 
 struct checker_texture
 {
-    transform_2d transform;
-    color odd;
-    color even;
+    scale_2D scale;
+    color odd, even;
 };
 
 struct constant_texture
@@ -44,6 +42,6 @@ struct image_texture
 
 struct noise_texture
 {
-    transform_2d transform;
-    color base_color;
+    float scale;
+    color color_1, color_2;
 };

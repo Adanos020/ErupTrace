@@ -10,8 +10,8 @@
 
 static color color_on_texture(const checker_texture& in_checker_texture, const barycentric_2D& in_mapping)
 {
-    if (glm::sin(in_checker_texture.transform.translation.x + in_checker_texture.transform.scale.x * in_mapping.U) *
-        glm::sin(in_checker_texture.transform.translation.y + in_checker_texture.transform.scale.y * in_mapping.V) < 0.f)
+    if (glm::sin(in_checker_texture.scale.x * in_mapping.U) *
+        glm::sin(in_checker_texture.scale.y * in_mapping.V) < 0.f)
     {
         return in_checker_texture.odd;
     }
@@ -30,8 +30,6 @@ static color color_on_texture(const scene& in_scene, const image_texture& in_ima
     switch (in_image_texture.filtering)
     {
         case image::filtering_method::catrom:  return filter_catrom(sampled_image, image_fragment, in_mapping, in_image_texture.wrap);
-        case image::filtering_method::cubic:   return filter_cubic(sampled_image, image_fragment, in_mapping, in_image_texture.wrap);
-        case image::filtering_method::hermite: return filter_hermite(sampled_image, image_fragment, in_mapping, in_image_texture.wrap);
         case image::filtering_method::linear:  return filter_linear(sampled_image, image_fragment, in_mapping, in_image_texture.wrap);
         case image::filtering_method::nearest: return filter_nearest(sampled_image, image_fragment, in_mapping, in_image_texture.wrap);
     }

@@ -57,8 +57,7 @@ struct triangle
 
 struct axis_aligned_box
 {
-    position_3D min;
-    position_3D max;
+    position_3D min, max;
 
     float width() const
     {

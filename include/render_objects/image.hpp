@@ -21,8 +21,6 @@ struct image
     enum class filtering_method
     {
         catrom,
-        cubic,
-        hermite,
         linear,
         nearest,
     };
@@ -32,7 +30,5 @@ struct image
 };
 
 color filter_catrom(const image&, const min_max<texture_position_2D>& fragment, const barycentric_2D& mapping, image::wrap_method);
-color filter_cubic(const image&, const min_max<texture_position_2D>& fragment, const barycentric_2D& mapping, image::wrap_method);
-color filter_hermite(const image&, const min_max<texture_position_2D>& fragment, const barycentric_2D& mapping, image::wrap_method);
 color filter_linear(const image&, const min_max<texture_position_2D>& fragment, const barycentric_2D& mapping, image::wrap_method);
 color filter_nearest(const image&, const min_max<texture_position_2D>& fragment, const barycentric_2D& mapping, image::wrap_method);

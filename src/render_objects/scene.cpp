@@ -319,9 +319,9 @@ texture scene::add_checker_texture(const checker_texture& in_texture)
     return texture{ texture_type::checker, this->checker_textures.size() - 1 };
 }
 
-texture scene::add_checker_texture(const transform_2d& in_transform, const color& in_odd, const color& in_even)
+texture scene::add_checker_texture(const scale_2D& in_scale, const color& in_odd, const color& in_even)
 {
-    return this->add_checker_texture(checker_texture{ in_transform, in_odd, in_even });
+    return this->add_checker_texture(checker_texture{ in_scale, in_odd, in_even });
 }
 
 texture scene::add_constant_texture(const constant_texture& in_texture)
@@ -360,9 +360,9 @@ texture scene::add_noise_texture(const noise_texture& in_texture)
     return texture{ texture_type::noise, this->noise_textures.size() - 1 };
 }
 
-texture scene::add_noise_texture(const transform_2d& in_transform, const color& in_color)
+texture scene::add_noise_texture(const float& in_scale, const color& in_color)
 {
-    return this->add_noise_texture(noise_texture{ in_transform, in_color });
+    return this->add_noise_texture(noise_texture{ in_scale, in_color });
 }
 
 uint32_t scene::add_image(const image& in_image)

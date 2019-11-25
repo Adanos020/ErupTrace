@@ -57,14 +57,14 @@ struct scene
     material add_reflect_material(float fuzz, const texture& albedo);
 
     texture add_checker_texture(const checker_texture&);
-    texture add_checker_texture(const transform_2d&, const color& odd, const color& even);
+    texture add_checker_texture(const scale_2D&, const color& odd, const color& even);
     texture add_constant_texture(const constant_texture&);
     texture add_constant_texture(const color&);
     texture add_image_texture(const image_texture&);
     texture add_image_texture(array_index, image::wrap_method, image::filtering_method);
     texture add_image_texture(array_index, const min_max<texture_position_2D>& in_image_fragment, image::wrap_method, image::filtering_method);
     texture add_noise_texture(const noise_texture&);
-    texture add_noise_texture(const transform_2d&, const color&);
+    texture add_noise_texture(const float&, const color&);
 
     uint32_t add_image(const image&);
     uint32_t add_image(std::string_view path);

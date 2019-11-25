@@ -2,6 +2,8 @@
 
 #include <render_objects/scene.hpp>
 
+#include <glm/gtx/optimum_pow.hpp>
+
 #include <stack>
 
 static hit_record ray_hits(const plane_shape& in_plane, const ray& in_ray, const min_max<float>& in_distances)
@@ -12,7 +14,7 @@ static hit_record ray_hits(const plane_shape& in_plane, const ray& in_ray, const
         if (const float distance = glm::dot(in_plane.front, displacement) / dot; in_distances.is_value_clamped(distance))
         {
             const position_3D hit_point = in_ray.point_at_distance(distance);
-            return hit_record{ distance, hit_point, (-1.f + 2.f * float(dot < 0.f)) * in_plane.front, {}, /*texture_mapping*/ };
+            return hit_record{ distance, hit_point, -glm::sign(dot) * in_plane.front, {}, /*texture_mapping*/ };
         }
     }
     return hit_record::nope();
@@ -23,15 +25,16 @@ static hit_record ray_hits(const sphere_shape& in_sphere, const ray& in_ray, con
     const displacement_3D oc = in_ray.origin - in_sphere.origin;
     const float a = glm::dot(in_ray.direction, in_ray.direction);
     const float b = glm::dot(oc, in_ray.direction);
-    const float c = glm::dot(oc, oc) - glm::pow(in_sphere.radius, 2);
-    const float discriminant = b * b - a * c;
+    const float c = glm::dot(oc, oc) - glm::pow2(in_sphere.radius);
+    const float discriminant = glm::pow2(b) - a * c;
 
     if (discriminant > 0.f)
     {
-        float root = (-b - glm::sqrt(discriminant)) / a;
+        const float inverse_a = 1.f / a;
+        float root = (-b - glm::sqrt(discriminant)) * inverse_a;
         if (!in_distances.is_value_clamped(root))
         {
-            root = (-b + glm::sqrt(discriminant)) / a;
+            root = (-b + glm::sqrt(discriminant)) * inverse_a;
         }
         if (in_distances.is_value_clamped(root))
         {

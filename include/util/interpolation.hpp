@@ -2,16 +2,11 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/spline.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include <array>
 
-template<typename T = float>
-inline static T bilerp(const std::array<T, 4>& in_values, const float in_u, const float in_v)
-{
-    const T fxy_1 = glm::mix(in_values[0], in_values[1], in_u);
-    const T fxy_2 = glm::mix(in_values[2], in_values[3], in_u);
-    return glm::mix(fxy_1, fxy_2, in_v);
-}
+// 2D
 
 template<typename T = float>
 inline static T bicatrom(const std::array<T, 16>& in_values, const float in_u, const float in_v)
@@ -24,24 +19,14 @@ inline static T bicatrom(const std::array<T, 16>& in_values, const float in_u, c
 }
 
 template<typename T = float>
-inline static T bicubic(const std::array<T, 16>& in_values, const float in_u, const float in_v)
+inline static T bilerp(const std::array<T, 4>& in_values, const float in_u, const float in_v)
 {
-    const T v_1 = glm::cubic(in_values[0],  in_values[1],  in_values[2],  in_values[3],  in_u);
-    const T v_2 = glm::cubic(in_values[4],  in_values[5],  in_values[6],  in_values[7],  in_u);
-    const T v_3 = glm::cubic(in_values[8],  in_values[9],  in_values[10], in_values[11], in_u);
-    const T v_4 = glm::cubic(in_values[12], in_values[13], in_values[14], in_values[15], in_u);
-    return glm::cubic(v_1, v_2, v_3, v_4, in_v);
+    const T fxy_1 = glm::mix(in_values[0], in_values[1], in_u);
+    const T fxy_2 = glm::mix(in_values[2], in_values[3], in_u);
+    return glm::mix(fxy_1, fxy_2, in_v);
 }
 
-template<typename T = float>
-inline static T bihermite(const std::array<T, 16>& in_values, const float in_u, const float in_v)
-{
-    const T v_1 = glm::hermite(in_values[0],  in_values[1],  in_values[2],  in_values[3],  in_u);
-    const T v_2 = glm::hermite(in_values[4],  in_values[5],  in_values[6],  in_values[7],  in_u);
-    const T v_3 = glm::hermite(in_values[8],  in_values[9],  in_values[10], in_values[11], in_u);
-    const T v_4 = glm::hermite(in_values[12], in_values[13], in_values[14], in_values[15], in_u);
-    return glm::hermite(v_1, v_2, v_3, v_4, in_v);
-}
+// 3D
 
 template<typename T = float>
 inline static T trilerp(const std::array<T, 8>& in_values, const float in_u, const float in_v, const float in_w)
