@@ -30,18 +30,25 @@ inline static T map(const T in_value, const from_to<min_max<T>>& in_ranges)
 }
 
 template<typename T>
-inline static T mirrored_repeat(const T in_value, const min_max<T>& in_range)
+inline static T unit_mirrored_repeat(const T in_value)
 {
     static_assert(std::is_floating_point_v<T>);
 
     float i;
-    const float fract = glm::modf(normalize(in_value, in_range), i);
-    const float range_size = in_range.max - in_range.min;
+    const float fract = glm::modf(in_value, i);
     if (glm::mod(i, 2.f) != 0.f)
     {
-        return in_range.min + ((1.f - fract) * range_size);
+        return 1.f - fract;
     }
-    return in_range.min + (fract * range_size);
+    return fract;
+}
+
+template<typename T>
+inline static T mirrored_repeat(const T in_value, const min_max<T>& in_range)
+{
+    static_assert(std::is_floating_point_v<T>);
+    const float range_size = in_range.max - in_range.min;
+    return in_range.min + (unit_mirrored_repeat(normalize(glm::abs(in_value), in_range)) * range_size);
 }
 
 template<typename T>

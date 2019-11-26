@@ -153,26 +153,26 @@ render_plan render_plan::grass_block(const extent_2D<uint32_t>& image_size)
 
     const material ground = world.add_diffuse_material(
         world.add_image_texture(grass_image, { { 0, 16 }, { 16, 32 } },
-            image::wrap_method::repeat, image::filtering_method::nearest));
+            image::wrap_method::mirrored_repeat, image::filtering_method::nearest));
+
     world.add_plane_shape(plane{ position_3D{ -0.5f }, x_axis, z_axis }, ground);
-
-    const material bottom_face = world.add_diffuse_material(
-        world.add_image_texture(grass_image, { { 0, 0 }, { 16, 16 } },
-            image::wrap_method::clamp_to_edge, image::filtering_method::nearest));
-    const material top_face = world.add_diffuse_material(
-        world.add_image_texture(grass_image, { { 0, 16 }, { 16, 32 } },
-            image::wrap_method::clamp_to_edge, image::filtering_method::nearest));
-    const material side_face = world.add_diffuse_material(
-        world.add_image_texture(grass_image, { { 16, 0 }, { 32, 16 } },
-            image::wrap_method::clamp_to_edge, image::filtering_method::nearest));
-
-
-    world.assemble_cuboid({
-        position_3D{ 0.f, 0.f, 0.f },
-        extent_3D{ 0.5f, 0.5f, 0.5f },
-        glm::quat{ glm::vec3{ 0.f, 0.f, 0.f } },
-        bottom_face, top_face, side_face, side_face, side_face, side_face,
-    });
+// 
+//     const material bottom_face = world.add_diffuse_material(
+//         world.add_image_texture(grass_image, { { 0, 0 }, { 16, 16 } },
+//             image::wrap_method::clamp_to_edge, image::filtering_method::nearest));
+//     const material top_face = world.add_diffuse_material(
+//         world.add_image_texture(grass_image, { { 0, 16 }, { 16, 32 } },
+//             image::wrap_method::clamp_to_edge, image::filtering_method::nearest));
+//     const material side_face = world.add_diffuse_material(
+//         world.add_image_texture(grass_image, { { 16, 0 }, { 32, 16 } },
+//             image::wrap_method::clamp_to_edge, image::filtering_method::nearest));
+// 
+//     world.assemble_cuboid({
+//         position_3D{ 0.f, 0.f, 0.f },
+//         extent_3D{ 0.5f, 0.5f, 0.5f },
+//         glm::quat{ glm::vec3{ 0.f, 0.f, 0.f } },
+//         bottom_face, top_face, side_face, side_face, side_face, side_face,
+//     });
 
     world.hierarchy = make_hierarchy(world.shapes);
     return render_plan{ image_size, cam, std::move(world) };

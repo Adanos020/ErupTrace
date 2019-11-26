@@ -8,7 +8,6 @@
 std::vector<uint8_t> scene::to_bytes() const
 {
     const size_t sky_size = sizeof(texture);
-
     const size_t hierarchy_size = sizeof(BIH_node) * this->hierarchy.size();
 
     const size_t infinite_shapes_size = sizeof(shape) * this->infinite_shapes.size();
@@ -71,7 +70,6 @@ std::vector<uint8_t> scene::to_bytes() const
 size_t scene::size() const
 {
     const size_t sky_size = sizeof(texture);
-
     const size_t hierarchy_size = sizeof(BIH_node) * this->hierarchy.size();
 
     const size_t infinite_shapes_size = sizeof(shape) * this->infinite_shapes.size();

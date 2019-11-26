@@ -22,8 +22,8 @@ static float wrap(const float in_value, const min_max<float>& in_range, const im
 static barycentric_2D wrap(const barycentric_2D& in_mapping, const image::wrap_method in_wrap_method)
 {
     return barycentric_2D{
-        wrap(in_mapping.U, { 0.f, 1.f }, in_wrap_method),
-        wrap(in_mapping.V, { 0.f, 1.f }, in_wrap_method),
+        wrap(in_mapping.U, { 0.f, 1.f - glm::epsilon<float>() }, in_wrap_method),
+        wrap(in_mapping.V, { 0.f, 1.f - glm::epsilon<float>() }, in_wrap_method),
     };
 }
 

@@ -50,7 +50,7 @@ int main()
         const render_plan plan = render_plan::grass_block(image_size);
         renderer_cpu renderer{ 500, THREAD_COUNT };
 #ifdef SINGLE_PIXEL_TEST
-        const pixel_position pixel_pos = { 830, 435 };
+        const pixel_position pixel_pos = { 260, 525 };
         const color pixel = renderer.render_single_pixel(plan, pixel_pos);
         std::cout << "Rendered color {" << pixel.r << " " << pixel.g << " " << pixel.b
             << "} at pixel {" << pixel_pos.x << " " << pixel_pos.y << "}" << std::endl;
