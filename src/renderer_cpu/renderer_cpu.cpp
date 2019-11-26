@@ -14,7 +14,7 @@ renderer_cpu::renderer_cpu(const uint32_t sample_count, const uint32_t thread_co
 {
 }
 
-std::vector<rgba> renderer_cpu::render_scene(const render_plan& plan)
+std::vector<rgba> renderer_cpu::render_scene(const render_plan& plan) const
 {
     const uint32_t fragment_height = plan.image_size.height / this->thread_count;
 
@@ -43,12 +43,13 @@ std::vector<rgba> renderer_cpu::render_scene(const render_plan& plan)
     return image;
 }
 
-color renderer_cpu::render_single_pixel(const render_plan& in_plan, const pixel_position& in_position)
+color renderer_cpu::render_single_pixel(const render_plan& in_plan, const pixel_position& in_position) const
 {
     return this->render_pixel(in_plan, in_position, { 1.f / in_plan.image_size.width, 1.f / in_plan.image_size.height });
 }
 
-std::vector<rgba> renderer_cpu::render_fragment(const render_plan* in_plan, const position_2D& top_left, const position_2D& bottom_right)
+std::vector<rgba> renderer_cpu::render_fragment(const render_plan* in_plan, const position_2D& top_left,
+    const position_2D& bottom_right) const
 {
     const uint32_t width = bottom_right.x - top_left.x;
     const uint32_t height = bottom_right.y - top_left.y;
@@ -75,7 +76,8 @@ std::vector<rgba> renderer_cpu::render_fragment(const render_plan* in_plan, cons
     return image_fragment;
 }
 
-color renderer_cpu::render_pixel(const render_plan& in_plan, const pixel_position& in_position, const extent_2D<float>& in_inverse_size)
+color renderer_cpu::render_pixel(const render_plan& in_plan, const pixel_position& in_position,
+    const extent_2D<float>& in_inverse_size) const
 {
     color col{ 0.f };
     for (uint32_t s = 0; s < sample_count; ++s)

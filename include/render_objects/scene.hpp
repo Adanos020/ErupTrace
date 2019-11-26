@@ -37,7 +37,7 @@ struct scene
     size_t size() const;
 
     shape add_plane_shape(const plane_shape&, const material&);
-    shape add_plane_shape(const plane&, const min_max<position_3D>& textured_area, const material&);
+    shape add_plane_shape(const plane&, const material&);
     shape add_sphere_shape(const sphere_shape&, const material&);
     shape add_sphere_shape(const sphere&, const direction_3D& axial_tilt, const material&);
     shape add_triangle_shape(const triangle_shape&, const material&);

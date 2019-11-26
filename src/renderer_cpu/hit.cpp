@@ -8,13 +8,16 @@
 
 static hit_record ray_hits(const plane_shape& in_plane, const ray& in_ray, const min_max<float>& in_distances)
 {
-    if (const float dot = glm::dot(in_plane.front, in_ray.direction); dot != 0.f)
+    const direction_3D plane_normal = glm::normalize(glm::cross(in_plane.right, in_plane.up));
+    if (const float dot = glm::dot(plane_normal, in_ray.direction); dot != 0.f)
     {
         const displacement_3D displacement = in_plane.origin - in_ray.origin;
-        if (const float distance = glm::dot(in_plane.front, displacement) / dot; in_distances.is_value_clamped(distance))
+        if (const float distance = glm::dot(plane_normal, displacement) / dot; in_distances.is_value_clamped(distance))
         {
             const position_3D hit_point = in_ray.point_at_distance(distance);
-            return hit_record{ distance, hit_point, -glm::sign(dot) * in_plane.front, {}, /*texture_mapping*/ };
+            const displacement_3D delta = hit_point - in_plane.origin;
+            const barycentric_2D texture_mapping = { glm::dot(delta, in_plane.right), glm::dot(delta, in_plane.up) };
+            return hit_record{ distance, hit_point, -glm::sign(dot) * plane_normal, {}, texture_mapping };
         }
     }
     return hit_record::nope();
@@ -36,12 +39,13 @@ static hit_record ray_hits(const sphere_shape& in_sphere, const ray& in_ray, con
         {
             root = (-b + glm::sqrt(discriminant)) * inverse_a;
         }
+
         if (in_distances.is_value_clamped(root))
         {
             const position_3D hit_point = in_ray.point_at_distance(root);
-            const barycentric_2D texture_coord = mapping_on_sphere(
-                (hit_point - in_sphere.origin) / in_sphere.radius, in_sphere.axial_tilt);
-            return hit_record{ root, hit_point, (hit_point - in_sphere.origin) / in_sphere.radius, {}, texture_coord };
+            const direction_3D normal = (hit_point - in_sphere.origin) / in_sphere.radius;
+            const barycentric_2D texture_mapping = mapping_on_sphere(normal, in_sphere.axial_tilt);
+            return hit_record{ root, hit_point, normal, {}, texture_mapping };
         }
     }
     return hit_record::nope();

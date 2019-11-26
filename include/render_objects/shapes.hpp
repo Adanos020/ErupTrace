@@ -24,8 +24,6 @@ struct shape
 
 struct plane_shape : plane
 {
-    min_max<position_3D> textured_area;
-
     axis_aligned_box bounding_box() const
     {
         return axis_aligned_box::zero();

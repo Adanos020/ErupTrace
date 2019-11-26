@@ -42,11 +42,12 @@ inline static barycentric_2D mapping_on_sphere(const position_3D& in_normalized_
 struct plane
 {
     position_3D origin;
-    direction_3D front;
+    displacement_3D right;
+    displacement_3D up;
 
     plane inverse() const
     {
-        return plane{ this->origin, -this->front };
+        return plane{ this->origin, -this->right, -this->up };
     }
 };
 

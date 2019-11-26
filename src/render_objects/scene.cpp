@@ -116,9 +116,9 @@ shape scene::add_plane_shape(const plane_shape& in_plane, const material& in_mat
     return this->infinite_shapes.back();
 }
 
-shape scene::add_plane_shape(const plane& in_plane, const min_max<position_3D>& in_textured_area, const material& in_material)
+shape scene::add_plane_shape(const plane& in_plane, const material& in_material)
 {
-    return this->add_plane_shape(plane_shape{ in_plane, in_textured_area }, in_material);
+    return this->add_plane_shape(plane_shape{ in_plane }, in_material);
 }
 
 shape scene::add_sphere_shape(const sphere_shape& in_sphere, const material& in_material)

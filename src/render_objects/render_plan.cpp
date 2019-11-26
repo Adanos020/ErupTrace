@@ -20,9 +20,10 @@ render_plan render_plan::test_scene(const extent_2D<uint32_t>& image_size)
         image::wrap_method::repeat, image::filtering_method::linear);
 
     // floor
-    world.add_plane_shape(plane{ position_3D{ 0.f, -0.2f, 0.f }, y_axis }, {},
+    world.add_plane_shape(plane{ position_3D{ 0.f, -0.2f, 0.f }, x_axis, z_axis },
         world.add_diffuse_material(
-            world.add_constant_texture({ color{ 0.7f, 1.f, 0.3f } })));
+            world.add_image_texture(world.add_image("textures/grass.jpg"),
+                image::wrap_method::repeat, image::filtering_method::linear)));
 
     // blocks
     {
@@ -39,7 +40,7 @@ render_plan render_plan::test_scene(const extent_2D<uint32_t>& image_size)
     {
         const material lamp = world.add_emit_light_material(
             world.add_image_texture(world.add_image("textures/redstone_lamp_on.png"),
-                image::wrap_method::repeat, image::filtering_method::nearest), 1.5f);
+                image::wrap_method::clamp_to_edge, image::filtering_method::nearest), 1.5f);
         world.assemble_cuboid({
             position_3D{ -0.2f, 0.5f, 0.2f },
             extent_3D{ 0.2f, 0.2f, 0.2f },
@@ -53,13 +54,13 @@ render_plan render_plan::test_scene(const extent_2D<uint32_t>& image_size)
 
         const material grass_bottom_face = world.add_diffuse_material(
             world.add_image_texture(grass_image, { { 0, 0 }, { 16, 16 } },
-                image::wrap_method::repeat, image::filtering_method::nearest));
+                image::wrap_method::clamp_to_edge, image::filtering_method::nearest));
         const material grass_top_face = world.add_diffuse_material(
             world.add_image_texture(grass_image, { { 0, 16 }, { 16, 32 } },
-                image::wrap_method::repeat, image::filtering_method::nearest));
+                image::wrap_method::clamp_to_edge, image::filtering_method::nearest));
         const material grass_side_face = world.add_diffuse_material(
             world.add_image_texture(grass_image, { { 16, 0 }, { 32, 16 } },
-                image::wrap_method::repeat, image::filtering_method::nearest));
+                image::wrap_method::clamp_to_edge, image::filtering_method::nearest));
 
         world.assemble_cuboid({
             position_3D{ 0.f, -0.1f, -0.3f },
@@ -148,11 +149,12 @@ render_plan render_plan::grass_block(const extent_2D<uint32_t>& image_size)
         world.add_image("textures/sky.jpg"), { { 0, 0 }, { 2880, 1440 } },
         image::wrap_method::repeat, image::filtering_method::linear);
 
-    world.add_plane_shape(plane{ position_3D{ 0.f, -0.5f, 0.f }, y_axis }, {},
-        world.add_diffuse_material(
-            world.add_constant_texture({ color{ 0.7f, 1.f, 0.3f } })));
-
     const uint32_t grass_image = world.add_image("textures/mc_grass.png");
+
+    const material ground = world.add_diffuse_material(
+        world.add_image_texture(grass_image, { { 0, 16 }, { 16, 32 } },
+            image::wrap_method::repeat, image::filtering_method::nearest));
+    world.add_plane_shape(plane{ position_3D{ -0.5f }, x_axis, z_axis }, ground);
 
     const material bottom_face = world.add_diffuse_material(
         world.add_image_texture(grass_image, { { 0, 0 }, { 16, 16 } },
@@ -162,7 +164,8 @@ render_plan render_plan::grass_block(const extent_2D<uint32_t>& image_size)
             image::wrap_method::clamp_to_edge, image::filtering_method::nearest));
     const material side_face = world.add_diffuse_material(
         world.add_image_texture(grass_image, { { 16, 0 }, { 32, 16 } },
-            image::wrap_method::clamp_to_edge, image::filtering_method::catrom));
+            image::wrap_method::clamp_to_edge, image::filtering_method::nearest));
+
 
     world.assemble_cuboid({
         position_3D{ 0.f, 0.f, 0.f },
