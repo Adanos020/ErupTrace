@@ -81,9 +81,11 @@ render_plan render_plan::test_scene(const extent_2D<uint32_t>& image_size)
 
     // balls
     world.add_sphere_shape(sphere{ position_3D{ -0.6f, 0.f, 0.f }, 0.2f }, glm::normalize(displacement_3D{ 0.5f, 1.f, -0.5f }),
-        world.add_diffuse_material(world.add_image_texture(
-            world.add_image("textures/earth.jpg"), { { 0, 0 }, { 8192, 4096 } },
-            wrap_method::repeat, filtering_method::linear)));
+        world.add_diffuse_material(
+            world.add_image_texture(world.add_image("textures/earth.jpg"),
+                wrap_method::repeat, filtering_method::catrom),
+            world.add_normal_texture(world.add_normal_map("textures/earth_normal.png"),
+                wrap_method::repeat, filtering_method::catrom)));
     world.add_sphere_shape(sphere{ position_3D{ -0.2f, 0.f, 0.f }, 0.2f }, y_axis,
         world.add_reflect_material(0.015f,
             world.add_constant_texture(color{ 1.f, 0.7f, 0.8f })));

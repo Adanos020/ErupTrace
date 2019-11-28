@@ -3,8 +3,8 @@
 #include <render_objects/hierarchy.hpp>
 #include <render_objects/image.hpp>
 #include <render_objects/materials.hpp>
-#include <render_objects/shapes.hpp>
 #include <render_objects/shape_assembly.hpp>
+#include <render_objects/shapes.hpp>
 #include <render_objects/textures.hpp>
 
 #include <vector>

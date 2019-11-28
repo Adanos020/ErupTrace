@@ -273,6 +273,10 @@ material scene::add_dielectric_material(const dielectric_material& in_material, 
 
 material scene::add_dielectric_material(const float in_refractive_index, const texture& in_albedo, const texture& in_normals)
 {
+    if (in_normals.type != texture_type::normal)
+    {
+        throw std::runtime_error("Given texture is not a normal map.");
+    }
     return this->add_dielectric_material(dielectric_material{ in_refractive_index, in_albedo }, in_normals.index);
 }
 
@@ -289,6 +293,10 @@ material scene::add_diffuse_material(const diffuse_material& in_material, const 
 
 material scene::add_diffuse_material(const texture& in_albedo, const texture& in_normals)
 {
+    if (in_normals.type != texture_type::normal)
+    {
+        throw std::runtime_error("Given texture is not a normal map.");
+    }
     return this->add_diffuse_material(diffuse_material{ in_albedo }, in_normals.index);
 }
 
@@ -305,6 +313,10 @@ material scene::add_emit_light_material(const emit_light_material& in_material, 
 
 material scene::add_emit_light_material(const float in_intensity, const texture& in_emit, const texture& in_normals)
 {
+    if (in_normals.type != texture_type::normal)
+    {
+        throw std::runtime_error("Given texture is not a normal map.");
+    }
     return this->add_emit_light_material(emit_light_material{ in_emit, in_intensity }, in_normals.index);
 }
 
@@ -321,6 +333,10 @@ material scene::add_reflect_material(const reflect_material& in_material, const 
 
 material scene::add_reflect_material(const float in_fuzz, const texture& in_albedo, const texture& in_normals)
 {
+    if (in_normals.type != texture_type::normal)
+    {
+        throw std::runtime_error("Given texture is not a normal map.");
+    }
     return this->add_reflect_material(reflect_material{ in_fuzz, in_albedo }, in_normals.index);
 }
 
