@@ -7,19 +7,19 @@
 
 // Wrapping
 
-static float wrap(const float in_value, const min_max<float>& in_range, const image::wrap_method in_wrap_method)
+static float wrap(const float in_value, const min_max<float>& in_range, const wrap_method in_wrap_method)
 {
     switch (in_wrap_method)
     {
-        case image::wrap_method::clamp_to_border: return is_clamped(in_value, { in_range.min, in_range.max }) ? in_value : -1.f;
-        case image::wrap_method::clamp_to_edge:   return glm::clamp(in_value, in_range.min, in_range.max);
-        case image::wrap_method::mirrored_repeat: return mirrored_repeat(in_value, in_range);
-        case image::wrap_method::repeat:          return repeat(in_value, in_range);
+        case wrap_method::clamp_to_border: return is_clamped(in_value, { in_range.min, in_range.max }) ? in_value : -1.f;
+        case wrap_method::clamp_to_edge:   return glm::clamp(in_value, in_range.min, in_range.max);
+        case wrap_method::mirrored_repeat: return mirrored_repeat(in_value, in_range);
+        case wrap_method::repeat:          return repeat(in_value, in_range);
     }
     return -1.f;
 }
 
-static barycentric_2D wrap(const barycentric_2D& in_mapping, const image::wrap_method in_wrap_method)
+static barycentric_2D wrap(const barycentric_2D& in_mapping, const wrap_method in_wrap_method)
 {
     return barycentric_2D{
         wrap(in_mapping.U, { 0.f, 1.f - glm::epsilon<float>() }, in_wrap_method),
@@ -29,9 +29,10 @@ static barycentric_2D wrap(const barycentric_2D& in_mapping, const image::wrap_m
 
 // Filtering
 
-static auto pick_4x4_neighbors_and_interpolants(const image& in_sampled_image,
+template<typename vector_type>
+static auto pick_4x4_neighbors_and_interpolants(const vector_map<vector_type>& in_sampled_image,
     const min_max<texture_position_2D>& in_image_fragment, const barycentric_2D& in_mapping,
-    const image::wrap_method in_wrap_method)
+    const wrap_method in_wrap_method)
 {
     const auto wrap_s_in_fragment = [&](const float s) {
         return wrap(s, { in_image_fragment.min.s, in_image_fragment.max.s - 1 }, in_wrap_method);
@@ -80,9 +81,10 @@ static auto pick_4x4_neighbors_and_interpolants(const image& in_sampled_image,
     return std::make_tuple(texels, s_fract, t_fract);
 }
 
-static auto pick_2x2_neighbors_and_interpolants(const image& in_sampled_image,
+template<typename vector_type>
+static auto pick_2x2_neighbors_and_interpolants(const vector_map<vector_type>& in_sampled_image,
     const min_max<texture_position_2D>& in_image_fragment, const barycentric_2D& in_mapping,
-    const image::wrap_method in_wrap_method)
+    const wrap_method in_wrap_method)
 {
     const auto wrap_s_in_fragment = [&](const float s) {
         return wrap(s, { in_image_fragment.min.s, in_image_fragment.max.s - 1 }, in_wrap_method);
@@ -118,24 +120,27 @@ static auto pick_2x2_neighbors_and_interpolants(const image& in_sampled_image,
     return std::make_tuple(texels, s_fract, t_fract);
 }
 
-color filter_catrom(const image& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
-    const barycentric_2D& in_mapping, const image::wrap_method in_wrap_method)
+template<typename vector_type>
+vector_type filter_catrom(const vector_map<vector_type>& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
+    const barycentric_2D& in_mapping, const wrap_method in_wrap_method)
 {
     const auto [neighbors, U, V] = pick_4x4_neighbors_and_interpolants(
         in_sampled_image, in_image_fragment, in_mapping, in_wrap_method);
     return bicatrom(neighbors, U, V);
 }
 
-color filter_linear(const image& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
-    const barycentric_2D& in_mapping, const image::wrap_method in_wrap_method)
+template<typename vector_type>
+vector_type filter_linear(const vector_map<vector_type>& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
+    const barycentric_2D& in_mapping, const wrap_method in_wrap_method)
 {
     const auto [neighbors, U, V] = pick_2x2_neighbors_and_interpolants(
         in_sampled_image, in_image_fragment, in_mapping, in_wrap_method);
     return bilerp(neighbors, U, V);
 }
 
-color filter_nearest(const image& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
-    const barycentric_2D& in_mapping, const image::wrap_method in_wrap_method)
+template<typename vector_type>
+vector_type filter_nearest(const vector_map<vector_type>& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
+    const barycentric_2D& in_mapping, const wrap_method in_wrap_method)
 {
     if (const barycentric_2D final_mapping = wrap(in_mapping, in_wrap_method);
         final_mapping.U >= 0.f && final_mapping.V >= 0.f)
@@ -150,3 +155,18 @@ color filter_nearest(const image& in_sampled_image, const min_max<texture_positi
     }
     return black;
 }
+
+// Instantiations
+
+#define FILTER_ARGS(vector_type)\
+    const vector_map<vector_type>&,\
+    const min_max<texture_position_2D>&,\
+    const barycentric_2D&,\
+    wrap_method
+template color filter_catrom(FILTER_ARGS(color));
+template color filter_linear(FILTER_ARGS(color));
+template color filter_nearest(FILTER_ARGS(color));
+template displacement_3D filter_catrom(FILTER_ARGS(displacement_3D));
+template displacement_3D filter_linear(FILTER_ARGS(displacement_3D));
+template displacement_3D filter_nearest(FILTER_ARGS(displacement_3D));
+#undef FILTER_ARGS

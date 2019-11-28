@@ -14,7 +14,7 @@ struct hit_record
     position_3D point;
     displacement_3D normal;
     material mat;
-    barycentric_2D texture_coord;
+    barycentric_2D mapping;
     bool occurred = true;
 
     static hit_record nope()

@@ -9,6 +9,8 @@
 #include <renderer_cpu/textures.hpp>
 #include <util/random.hpp>
 
+#define DRAW_NORMALS 0
+
 // Rays
 
 ray::ray()
@@ -46,14 +48,18 @@ color ray::trace(const scene& in_scene, const int32_t depth) const
     {
         if (const hit_record hit = ray_hits_anything(in_scene, *this); hit.occurred)
         {
+#if DRAW_NORMALS
+            return color{ 0.5f } + color{ 0.5f * hit.normal };
+#else
             const color emitted = emit(in_scene, hit.mat, hit);
-            if (const scattering sc = scatter(in_scene, hit.mat, *this, hit); sc.occurred)
+            if (scattering_record scattering = scatter(in_scene, hit.mat, *this, hit); scattering.occurred)
             {
-                return emitted + sc.attenuation * sc.scattered_ray.trace(in_scene, depth - 1);
+                return emitted + scattering.attenuation * scattering.scattered_ray.trace(in_scene, depth - 1);
             }
             return emitted;
+#endif
         }
     }
-    return color_on_texture(in_scene, in_scene.sky, mapping_on_sphere(glm::normalize(this->direction), y_axis),
-        this->origin + this->direction);
+    const direction_3D unit_direction = glm::normalize(this->direction);
+    return color_on_texture(in_scene, in_scene.sky, mapping_on_sphere(unit_direction, y_axis), this->origin + this->direction);
 }

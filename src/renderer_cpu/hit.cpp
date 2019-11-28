@@ -1,6 +1,7 @@
 #include <renderer_cpu/hit.hpp>
 
 #include <render_objects/scene.hpp>
+#include <renderer_cpu/textures.hpp>
 
 #include <glm/gtx/optimum_pow.hpp>
 
@@ -16,8 +17,8 @@ static hit_record ray_hits(const plane_shape& in_plane, const ray& in_ray, const
         {
             const position_3D hit_point = in_ray.point_at_distance(distance);
             const displacement_3D delta = hit_point - in_plane.origin;
-            const barycentric_2D texture_mapping = { glm::dot(delta, in_plane.right), glm::dot(delta, in_plane.up) };
-            return hit_record{ distance, hit_point, -glm::sign(dot) * plane_normal, {}, texture_mapping };
+            const barycentric_2D mapping = { glm::dot(delta, in_plane.right), glm::dot(delta, in_plane.up) };
+            return hit_record{ distance, hit_point, -glm::sign(dot) * plane_normal, {}, mapping };
         }
     }
     return hit_record::nope();
@@ -44,8 +45,8 @@ static hit_record ray_hits(const sphere_shape& in_sphere, const ray& in_ray, con
         {
             const position_3D hit_point = in_ray.point_at_distance(root);
             const direction_3D normal = (hit_point - in_sphere.origin) / in_sphere.radius;
-            const barycentric_2D texture_mapping = mapping_on_sphere(normal, in_sphere.axial_tilt);
-            return hit_record{ root, hit_point, normal, {}, texture_mapping };
+            const barycentric_2D mapping = mapping_on_sphere(normal, in_sphere.axial_tilt);
+            return hit_record{ root, hit_point, normal, {}, mapping };
         }
     }
     return hit_record::nope();
@@ -71,11 +72,11 @@ static hit_record ray_hits(const triangle_shape& in_triangle, const ray& in_ray,
             {
                 const position_3D hit_point = in_ray.point_at_distance(distance);
                 const direction_3D normal = ((1.f - u - v) * in_triangle.normal_a) + (u * in_triangle.normal_b) + (v * in_triangle.normal_c);
-                const barycentric_2D texture_mapping = {
+                const barycentric_2D mapping = {
                     ((1.f - u - v) * in_triangle.mapping_a.U) + (u * in_triangle.mapping_b.U) + (v * in_triangle.mapping_c.U),
                     ((1.f - u - v) * in_triangle.mapping_a.V) + (u * in_triangle.mapping_b.V) + (v * in_triangle.mapping_c.V),
                 };
-                return hit_record{ distance, hit_point, normal, {}, texture_mapping };
+                return hit_record{ distance, hit_point, normal, {}, mapping };
             }
         }
     }
@@ -90,11 +91,18 @@ static hit_record ray_hits(const scene& in_scene, const shape& in_shape, const r
         case shape_type::plane:    hit = ray_hits(in_scene.plane_shapes[in_shape.index], in_ray, in_distances); break;
         case shape_type::sphere:   hit = ray_hits(in_scene.sphere_shapes[in_shape.index], in_ray, in_distances); break;
         case shape_type::triangle: hit = ray_hits(in_scene.triangle_shapes[in_shape.index], in_ray, in_distances); break;
-        default: break;
+        default: return hit;
     }
+
     if (hit.occurred)
     {
         hit.mat = in_shape.mat;
+        if (is_valid_index(hit.mat.normal_texture_index))
+        {
+            const normal_texture& normals = in_scene.normal_textures[hit.mat.normal_texture_index];
+            hit.normal = map_normal(hit.normal, normal_on_texture(in_scene, normals, hit.mapping));
+        }
+
         in_distances.max = hit.distance;
     }
     return hit;

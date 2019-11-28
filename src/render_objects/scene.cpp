@@ -265,48 +265,68 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
 
 // Materials
 
-material scene::add_dielectric_material(const dielectric_material& in_material)
+material scene::add_dielectric_material(const dielectric_material& in_material, const invalidable_array_index normal_map_index)
 {
     this->dielectric_materials.push_back(in_material);
-    return material{ material_type::dielectric, this->dielectric_materials.size() - 1 };
+    return material{ material_type::dielectric, this->dielectric_materials.size() - 1, normal_map_index };
+}
+
+material scene::add_dielectric_material(const float in_refractive_index, const texture& in_albedo, const texture& in_normals)
+{
+    return this->add_dielectric_material(dielectric_material{ in_refractive_index, in_albedo }, in_normals.index);
 }
 
 material scene::add_dielectric_material(const float in_refractive_index, const texture& in_albedo)
 {
-    return this->add_dielectric_material(dielectric_material{ in_refractive_index, in_albedo });
+    return this->add_dielectric_material(dielectric_material{ in_refractive_index, in_albedo }, -1);
 }
 
-material scene::add_diffuse_material(const diffuse_material& in_material)
+material scene::add_diffuse_material(const diffuse_material& in_material, const invalidable_array_index normal_map_index)
 {
     this->diffuse_materials.push_back(in_material);
-    return material{ material_type::diffuse, this->diffuse_materials.size() - 1 };
+    return material{ material_type::diffuse, this->diffuse_materials.size() - 1, normal_map_index };
+}
+
+material scene::add_diffuse_material(const texture& in_albedo, const texture& in_normals)
+{
+    return this->add_diffuse_material(diffuse_material{ in_albedo }, in_normals.index);
 }
 
 material scene::add_diffuse_material(const texture& in_albedo)
 {
-    return this->add_diffuse_material(diffuse_material{ in_albedo });
+    return this->add_diffuse_material(diffuse_material{ in_albedo }, -1);
 }
 
-material scene::add_emit_light_material(const emit_light_material& in_material)
+material scene::add_emit_light_material(const emit_light_material& in_material, const invalidable_array_index normal_map_index)
 {
     this->emit_light_materials.push_back(in_material);
-    return material{ material_type::emit_light, this->emit_light_materials.size() - 1 };
+    return material{ material_type::emit_light, this->emit_light_materials.size() - 1, normal_map_index };
 }
 
-material scene::add_emit_light_material(const texture& in_emit, const float in_intensity)
+material scene::add_emit_light_material(const float in_intensity, const texture& in_emit, const texture& in_normals)
 {
-    return this->add_emit_light_material(emit_light_material{ in_emit, in_intensity });
+    return this->add_emit_light_material(emit_light_material{ in_emit, in_intensity }, in_normals.index);
 }
 
-material scene::add_reflect_material(const reflect_material& in_material)
+material scene::add_emit_light_material(const float in_intensity, const texture& in_emit)
+{
+    return this->add_emit_light_material(emit_light_material{ in_emit, in_intensity }, -1);
+}
+
+material scene::add_reflect_material(const reflect_material& in_material, const invalidable_array_index normal_map_index)
 {
     this->reflect_materials.push_back(in_material);
-    return material{ material_type::reflect, this->reflect_materials.size() - 1 };
+    return material{ material_type::reflect, this->reflect_materials.size() - 1, normal_map_index };
+}
+
+material scene::add_reflect_material(const float in_fuzz, const texture& in_albedo, const texture& in_normals)
+{
+    return this->add_reflect_material(reflect_material{ in_fuzz, in_albedo }, in_normals.index);
 }
 
 material scene::add_reflect_material(const float in_fuzz, const texture& in_albedo)
 {
-    return this->add_reflect_material(reflect_material{ in_fuzz, in_albedo });
+    return this->add_reflect_material(reflect_material{ in_fuzz, in_albedo }, -1);
 }
 
 // Textures
@@ -339,17 +359,17 @@ texture scene::add_image_texture(const image_texture& in_texture)
     return texture{ texture_type::image, this->image_textures.size() - 1 };
 }
 
-texture scene::add_image_texture(const array_index in_index, const min_max<texture_position_2D>& in_image_fragment,
-    const image::wrap_method in_wrap, const image::filtering_method in_filtering)
-{
-    return this->add_image_texture(image_texture{ in_index, in_image_fragment, in_wrap, in_filtering });
-}
-
-texture scene::add_image_texture(const array_index in_index, const image::wrap_method in_wrap,
-    const image::filtering_method in_filtering)
+texture scene::add_image_texture(const array_index in_index, const wrap_method in_wrap,
+    const filtering_method in_filtering)
 {
     const extent_2D<uint32_t>& size = this->images[in_index].size;
     return this->add_image_texture(in_index, { { 0.f, 0.f }, { size.width, size.height } }, in_wrap, in_filtering);
+}
+
+texture scene::add_image_texture(const array_index in_index, const min_max<texture_position_2D>& in_image_fragment,
+    const wrap_method in_wrap, const filtering_method in_filtering)
+{
+    return this->add_image_texture(image_texture{ in_index, in_image_fragment, in_wrap, in_filtering });
 }
 
 texture scene::add_noise_texture(const noise_texture& in_texture)
@@ -363,6 +383,24 @@ texture scene::add_noise_texture(const float& in_scale, const color& in_color)
     return this->add_noise_texture(noise_texture{ in_scale, in_color });
 }
 
+texture scene::add_normal_texture(const normal_texture& in_texture)
+{
+    this->normal_textures.push_back(in_texture);
+    return texture{ texture_type::normal, this->normal_textures.size() - 1 };
+}
+
+texture scene::add_normal_texture(const array_index in_index, const wrap_method in_wrap, const filtering_method in_filtering)
+{
+    const extent_2D<uint32_t>& size = this->normal_maps[in_index].size;
+    return this->add_normal_texture(in_index, { { 0.f, 0.f }, { size.width, size.height } }, in_wrap, in_filtering);
+}
+
+texture scene::add_normal_texture(const array_index in_index, const min_max<texture_position_2D>& in_map_fragment,
+    const wrap_method in_wrap, const filtering_method in_filtering)
+{
+    return this->add_normal_texture(normal_texture{ in_index, in_map_fragment, in_wrap, in_filtering });
+}
+
 uint32_t scene::add_image(const image& in_image)
 {
     this->images.push_back(in_image);
@@ -371,23 +409,59 @@ uint32_t scene::add_image(const image& in_image)
 
 uint32_t scene::add_image(const std::string_view in_path)
 {
+    using namespace std::literals;
     int32_t width = 0, height = 0, channels = 4;
-    uint8_t* data = stbi_load(in_path.data(), &width, &height, &channels, STBI_rgb_alpha);
-
-    image loaded_image{ extent_2D{ uint32_t(width), uint32_t(height) } };
-    loaded_image.pixels.resize(width * height);
-
-    constexpr float normalized_rgb = 1.f / 255.f;
-
-    for (uint32_t i = 0; i < loaded_image.pixels.size(); ++i)
+    if (uint8_t* data = stbi_load(in_path.data(), &width, &height, &channels, STBI_rgb_alpha))
     {
-        loaded_image.pixels[i] = normalized_rgb * color{
-            data[4 * i + 0],
-            data[4 * i + 1],
-            data[4 * i + 2],
-        };
-    }
+        image loaded_image{ extent_2D{ uint32_t(width), uint32_t(height) } };
+        loaded_image.pixels.resize(width * height);
 
-    stbi_image_free(data);
-    return this->add_image(std::move(loaded_image));
+        constexpr float normalized_rgb = 1.f / 255.f;
+
+        for (uint32_t i = 0; i < loaded_image.pixels.size(); ++i)
+        {
+            const color pixel = {
+                float(data[4 * i + 0]) * normalized_rgb,
+                float(data[4 * i + 1]) * normalized_rgb,
+                float(data[4 * i + 2]) * normalized_rgb,
+            };
+            loaded_image.pixels[i] = pixel;
+        }
+
+        stbi_image_free(data);
+        return this->add_image(std::move(loaded_image));
+    }
+    throw std::runtime_error("Image file '"s + in_path.data() + "' not found.");
+}
+
+uint32_t scene::add_normal_map(const normal_map& in_normal_map)
+{
+    this->normal_maps.push_back(in_normal_map);
+    return this->normal_maps.size() - 1;
+}
+
+uint32_t scene::add_normal_map(std::string_view in_path)
+{
+    using namespace std::literals;
+    int32_t width = 0, height = 0, channels = 4;
+    if (uint8_t* data = stbi_load(in_path.data(), &width, &height, &channels, STBI_rgb_alpha))
+    {
+        normal_map loaded_normal_map{ extent_2D{ uint32_t(width), uint32_t(height) } };
+        loaded_normal_map.pixels.resize(width * height);
+
+        constexpr float rgb_to_direction = 2.f / 255.f;
+        for (uint32_t i = 0; i < loaded_normal_map.pixels.size(); ++i)
+        {
+            const direction_3D normal = {
+                (float(data[4 * i + 0]) * rgb_to_direction) - 1.f,
+                (float(data[4 * i + 1]) * rgb_to_direction) - 1.f,
+                (float(data[4 * i + 2]) * rgb_to_direction) - 1.f,
+            };
+            loaded_normal_map.pixels[i] = glm::normalize(normal);
+        }
+
+        stbi_image_free(data);
+        return this->add_normal_map(std::move(loaded_normal_map));
+    }
+    throw std::runtime_error("Normal map file '"s + in_path.data() + "' not found.");
 }

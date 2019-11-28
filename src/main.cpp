@@ -12,7 +12,7 @@
 #   define THREAD_COUNT 20
 #else
 #   define THREAD_COUNT 1
-#   define SINGLE_PIXEL_TEST
+#   define SINGLE_PIXEL_TEST 1
 #endif
 
 using namespace std::string_literals;
@@ -47,10 +47,10 @@ int main()
     try
     {
         const extent_2D<uint32_t> image_size = { 1600, 900 };
-        const render_plan plan = render_plan::grass_block(image_size);
+        const render_plan plan = render_plan::test_scene(image_size);
         renderer_cpu renderer{ 500, THREAD_COUNT };
-#ifdef SINGLE_PIXEL_TEST
-        const pixel_position pixel_pos = { 260, 525 };
+#if SINGLE_PIXEL_TEST
+        const pixel_position pixel_pos = { 254, 400 };
         const color pixel = renderer.render_single_pixel(plan, pixel_pos);
         std::cout << "Rendered color {" << pixel.r << " " << pixel.g << " " << pixel.b
             << "} at pixel {" << pixel_pos.x << " " << pixel_pos.y << "}" << std::endl;

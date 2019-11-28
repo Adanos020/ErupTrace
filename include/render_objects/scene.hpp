@@ -47,16 +47,20 @@ struct scene
     std::vector<emit_light_material> emit_light_materials;
     std::vector<reflect_material> reflect_materials;
 
-    material add_dielectric_material(const dielectric_material&);
+    material add_dielectric_material(const dielectric_material&, invalidable_array_index normal_map_index);
+    material add_dielectric_material(float refractive_index, const texture& albedo, const texture& normals);
     material add_dielectric_material(float refractive_index, const texture& albedo);
 
-    material add_diffuse_material(const diffuse_material&);
+    material add_diffuse_material(const diffuse_material&, invalidable_array_index normal_map_index);
+    material add_diffuse_material(const texture& albedo, const texture& normals);
     material add_diffuse_material(const texture& albedo);
 
-    material add_emit_light_material(const emit_light_material&);
-    material add_emit_light_material(const texture& emit, float intensity);
+    material add_emit_light_material(const emit_light_material&, invalidable_array_index normal_map_index);
+    material add_emit_light_material(float intensity, const texture& emit, const texture& normals);
+    material add_emit_light_material(float intensity, const texture& emit);
 
-    material add_reflect_material(const reflect_material&);
+    material add_reflect_material(const reflect_material&, invalidable_array_index normal_map_index);
+    material add_reflect_material(float fuzz, const texture& albedo, const texture& normals);
     material add_reflect_material(float fuzz, const texture& albedo);
 
     // Textures
@@ -65,6 +69,7 @@ struct scene
     std::vector<constant_texture> constant_textures;
     std::vector<image_texture> image_textures;
     std::vector<noise_texture> noise_textures;
+    std::vector<normal_texture> normal_textures;
 
     texture add_checker_texture(const checker_texture&);
     texture add_checker_texture(const scale_2D&, const color& odd, const color& even);
@@ -73,17 +78,25 @@ struct scene
     texture add_constant_texture(const color&);
 
     texture add_image_texture(const image_texture&);
-    texture add_image_texture(array_index, image::wrap_method, image::filtering_method);
-    texture add_image_texture(array_index, const min_max<texture_position_2D>& in_image_fragment,
-        image::wrap_method, image::filtering_method);
+    texture add_image_texture(array_index image_index, wrap_method, filtering_method);
+    texture add_image_texture(array_index image_index, const min_max<texture_position_2D>& image_fragment,
+        wrap_method, filtering_method);
     
     texture add_noise_texture(const noise_texture&);
     texture add_noise_texture(const float&, const color&);
 
+    texture add_normal_texture(const normal_texture&);
+    texture add_normal_texture(array_index map_index, wrap_method, filtering_method);
+    texture add_normal_texture(array_index map_index, const min_max<texture_position_2D>& map_fragment,
+        wrap_method, filtering_method);
+
     // Assets
 
     std::vector<image> images;
+    std::vector<normal_map> normal_maps;
 
     uint32_t add_image(const image&);
     uint32_t add_image(std::string_view path);
+    uint32_t add_normal_map(const normal_map&);
+    uint32_t add_normal_map(std::string_view path);
 };

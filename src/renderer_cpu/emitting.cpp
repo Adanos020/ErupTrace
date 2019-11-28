@@ -5,7 +5,7 @@
 
 static color emit(const scene& in_scene, const emit_light_material& in_emit_light, const hit_record& in_hit)
 {
-    return in_emit_light.intensity * color_on_texture(in_scene, in_emit_light.emit, in_hit.texture_coord, in_hit.point);
+    return in_emit_light.intensity * color_on_texture(in_scene, in_emit_light.emit, in_hit.mapping, in_hit.point);
 }
 
 color emit(const scene& in_scene, const material& in_material, const hit_record& in_hit)

@@ -13,6 +13,7 @@ enum class texture_type
     constant,
     image,
     noise,
+    normal,
 };
 
 struct texture
@@ -36,12 +37,20 @@ struct image_texture
 {
     array_index image_index;
     min_max<texture_position_2D> image_fragment;
-    image::wrap_method wrap;
-    image::filtering_method filtering;
+    wrap_method wrap;
+    filtering_method filtering;
 };
 
 struct noise_texture
 {
     float scale;
     color color_1, color_2;
+};
+
+struct normal_texture
+{
+    array_index map_index;
+    min_max<texture_position_2D> map_fragment;
+    wrap_method wrap;
+    filtering_method filtering;
 };
