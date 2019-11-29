@@ -2,7 +2,6 @@
 #include <renderer_cpu/renderer_cpu.hpp>
 #include <util/string.hpp>
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <external/stb_image_write.h>
 
 #include <iostream>

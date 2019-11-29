@@ -39,6 +39,9 @@ struct scene
     
     void assemble_quad(const quad_assembly_info&);
     void assemble_cuboid(const cuboid_assembly_info&);
+    void assemble_model(const model_assembly_info&);
+
+    model_assembly_info load_model(const std::string_view path);
 
     // Materials
 

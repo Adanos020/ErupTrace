@@ -1,7 +1,7 @@
 #include <render_objects/scene.hpp>
 
-#define STB_IMAGE_IMPLEMENTATION
 #include <external/stb_image.h>
+#include <external/tiny_obj_loader.h>
 
 #include <cstring>
 
@@ -261,6 +261,69 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
         in_info.back_face,
     });
+}
+
+void scene::assemble_model(const model_assembly_info& in_info)
+{
+    for (size_t i = 0; i < in_info.vertices.size(); i += 3)
+    {
+        const vertex& a = in_info.vertices[i + 0];
+        const vertex& b = in_info.vertices[i + 1];
+        const vertex& c = in_info.vertices[i + 2];
+        this->add_triangle_shape(
+            triangle{
+                a.position,
+                b.position,
+                c.position,
+            },
+            std::array<direction_3D, 3>{
+                a.normal,
+                b.normal,
+                c.normal,
+            },
+            std::array<barycentric_2D, 3>{
+                a.mapping,
+                b.mapping,
+                c.mapping,
+            },
+            in_info.mat);
+    }
+}
+
+model_assembly_info scene::load_model(const std::string_view in_path)
+{
+    tinyobj::ObjReader model_loader;
+
+    if (!model_loader.ParseFromFile(in_path.data()))
+    {
+        throw std::runtime_error(model_loader.Warning() + model_loader.Error());
+    }
+
+    model_assembly_info info;
+    const tinyobj::attrib_t& attributes = model_loader.GetAttrib();
+    for (const tinyobj::shape_t& shape : model_loader.GetShapes())
+    {
+        for (const tinyobj::index_t& index : shape.mesh.indices)
+        {
+            info.vertices.push_back(vertex{
+                position_3D{
+                    attributes.vertices[3 * index.vertex_index + 0],
+                    attributes.vertices[3 * index.vertex_index + 1],
+                    attributes.vertices[3 * index.vertex_index + 2],
+                },
+                direction_3D{
+                    attributes.normals[3 * index.normal_index + 0],
+                    attributes.normals[3 * index.normal_index + 1],
+                    attributes.normals[3 * index.normal_index + 2],
+                },
+                barycentric_2D{
+                    attributes.texcoords[2 * index.texcoord_index + 0],
+                    attributes.texcoords[2 * index.texcoord_index + 1],
+                },
+            });
+        }
+    }
+    return info;
 }
 
 // Materials

@@ -3,8 +3,12 @@
 #include <render_objects/materials.hpp>
 #include <util/sizes.hpp>
 #include <util/vector.hpp>
+#include <util/vertex.hpp>
+
+#include <external/tiny_obj_loader.h>
 
 #include <array>
+#include <vector>
 
 struct quad_assembly_info
 {
@@ -26,4 +30,10 @@ struct cuboid_assembly_info
     material front_face;
     material back_face;
     bool face_inwards = false;
+};
+
+struct model_assembly_info
+{
+    std::vector<vertex> vertices;
+    material mat;
 };
