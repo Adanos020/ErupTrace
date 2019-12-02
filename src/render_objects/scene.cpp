@@ -464,6 +464,10 @@ texture scene::add_noise_texture(const float& in_scale, const color& in_color)
 
 texture scene::add_normal_texture(const normal_texture& in_texture)
 {
+    if (in_texture.wrap == wrap_method::clamp_to_border)
+    {
+        throw std::runtime_error("Clamping a normal map to border is not a good idea.");
+    }
     this->normal_textures.push_back(in_texture);
     return texture{ texture_type::normal, this->normal_textures.size() - 1 };
 }

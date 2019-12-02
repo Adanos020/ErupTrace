@@ -8,11 +8,10 @@
 
 #include <vector>
 
-template<typename vector_type>
 struct vector_map
 {
     extent_2D<uint32_t> size;
-    std::vector<vector_type> pixels;
+    std::vector<glm::vec3> pixels;
 };
 
 enum class wrap_method
@@ -30,15 +29,15 @@ enum class filtering_method
     nearest,
 };
 
-using image = vector_map<color>;
-using normal_map = vector_map<displacement_3D>;
+using image = vector_map;
+using normal_map = vector_map;
 
-#define FILTER_ARGS\
-    const vector_map<vector_type>&,\
-    const min_max<texture_position_2D>& map_fragment,\
-    const barycentric_2D& mapping,\
+#define FILTER_ARGS \
+    const vector_map&, \
+    const min_max<texture_position_2D>& map_fragment, \
+    const barycentric_2D& mapping, \
     wrap_method
-template<typename vector_type> vector_type filter_catrom(FILTER_ARGS);
-template<typename vector_type> vector_type filter_linear(FILTER_ARGS);
-template<typename vector_type> vector_type filter_nearest(FILTER_ARGS);
+glm::vec3 filter_catrom(FILTER_ARGS);
+glm::vec3 filter_linear(FILTER_ARGS);
+glm::vec3 filter_nearest(FILTER_ARGS);
 #undef FILTER_ARGS

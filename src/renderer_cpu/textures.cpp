@@ -22,24 +22,26 @@ static color color_on_texture(const constant_texture& in_constant_texture)
     return in_constant_texture.value;
 }
 
-template<typename vector_type>
-static vector_type value_on_vector_map(const vector_map<vector_type>& in_map, const barycentric_2D& in_mapping,
+static glm::vec3 value_on_vector_map(const vector_map& in_map, const barycentric_2D& in_mapping,
     const min_max<texture_position_2D>& in_map_fragment, const wrap_method in_wrap_method,
     const filtering_method in_filtering_method)
 {
     switch (in_filtering_method)
     {
-        case filtering_method::catrom:  return filter_catrom<vector_type>(in_map, in_map_fragment, in_mapping, in_wrap_method);
-        case filtering_method::linear:  return filter_linear<vector_type>(in_map, in_map_fragment, in_mapping, in_wrap_method);
-        case filtering_method::nearest: return filter_nearest<vector_type>(in_map, in_map_fragment, in_mapping, in_wrap_method);
+        case filtering_method::catrom:  return filter_catrom(in_map, in_map_fragment, in_mapping, in_wrap_method);
+        case filtering_method::linear:  return filter_linear(in_map, in_map_fragment, in_mapping, in_wrap_method);
+        case filtering_method::nearest: return filter_nearest(in_map, in_map_fragment, in_mapping, in_wrap_method);
     }
-    return vector_type{ 0.f };
 }
 
 static color color_on_texture(const scene& in_scene, const image_texture& in_image_texture, const barycentric_2D& in_mapping)
 {
-    return value_on_vector_map<color>(in_scene.images[in_image_texture.image_index], in_mapping,
-        in_image_texture.image_fragment, in_image_texture.wrap, in_image_texture.filtering);
+    return value_on_vector_map(
+        in_scene.images[in_image_texture.image_index],
+        in_mapping,
+        in_image_texture.image_fragment,
+        in_image_texture.wrap,
+        in_image_texture.filtering);
 }
 
 static color color_on_texture(const noise_texture& in_noise_texture, const barycentric_2D& in_mapping, const position_3D& in_position)
@@ -61,10 +63,10 @@ color color_on_texture(const scene& in_scene, const texture& in_texture, const b
 
 direction_3D normal_on_texture(const scene& in_scene, const normal_texture& in_normal_texture, const barycentric_2D& in_mapping)
 {
-    if (in_normal_texture.wrap == wrap_method::clamp_to_border)
-    {
-        throw std::runtime_error("Clamping a normal map to border is not a good idea.");
-    }
-    return value_on_vector_map<displacement_3D>(in_scene.normal_maps[in_normal_texture.map_index], in_mapping,
-        in_normal_texture.map_fragment, in_normal_texture.wrap, in_normal_texture.filtering);
+    return value_on_vector_map(
+        in_scene.normal_maps[in_normal_texture.map_index],
+        in_mapping,
+        in_normal_texture.map_fragment,
+        in_normal_texture.wrap,
+        in_normal_texture.filtering);
 }

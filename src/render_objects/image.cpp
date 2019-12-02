@@ -29,8 +29,7 @@ static barycentric_2D wrap(const barycentric_2D& in_mapping, const wrap_method i
 
 // Filtering
 
-template<typename vector_type>
-static auto pick_4x4_neighbors_and_interpolants(const vector_map<vector_type>& in_sampled_image,
+static auto pick_4x4_neighbors_and_interpolants(const vector_map& in_sampled_image,
     const min_max<texture_position_2D>& in_image_fragment, const barycentric_2D& in_mapping,
     const wrap_method in_wrap_method)
 {
@@ -81,8 +80,7 @@ static auto pick_4x4_neighbors_and_interpolants(const vector_map<vector_type>& i
     return std::make_tuple(texels, s_fract, t_fract);
 }
 
-template<typename vector_type>
-static auto pick_2x2_neighbors_and_interpolants(const vector_map<vector_type>& in_sampled_image,
+static auto pick_2x2_neighbors_and_interpolants(const vector_map& in_sampled_image,
     const min_max<texture_position_2D>& in_image_fragment, const barycentric_2D& in_mapping,
     const wrap_method in_wrap_method)
 {
@@ -120,8 +118,7 @@ static auto pick_2x2_neighbors_and_interpolants(const vector_map<vector_type>& i
     return std::make_tuple(texels, s_fract, t_fract);
 }
 
-template<typename vector_type>
-vector_type filter_catrom(const vector_map<vector_type>& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
+glm::vec3 filter_catrom(const vector_map& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
     const barycentric_2D& in_mapping, const wrap_method in_wrap_method)
 {
     const auto [neighbors, U, V] = pick_4x4_neighbors_and_interpolants(
@@ -129,8 +126,7 @@ vector_type filter_catrom(const vector_map<vector_type>& in_sampled_image, const
     return bicatrom(neighbors, U, V);
 }
 
-template<typename vector_type>
-vector_type filter_linear(const vector_map<vector_type>& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
+glm::vec3 filter_linear(const vector_map& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
     const barycentric_2D& in_mapping, const wrap_method in_wrap_method)
 {
     const auto [neighbors, U, V] = pick_2x2_neighbors_and_interpolants(
@@ -138,8 +134,7 @@ vector_type filter_linear(const vector_map<vector_type>& in_sampled_image, const
     return bilerp(neighbors, U, V);
 }
 
-template<typename vector_type>
-vector_type filter_nearest(const vector_map<vector_type>& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
+glm::vec3 filter_nearest(const vector_map& in_sampled_image, const min_max<texture_position_2D>& in_image_fragment,
     const barycentric_2D& in_mapping, const wrap_method in_wrap_method)
 {
     if (const barycentric_2D final_mapping = wrap(in_mapping, in_wrap_method);
@@ -155,18 +150,3 @@ vector_type filter_nearest(const vector_map<vector_type>& in_sampled_image, cons
     }
     return black;
 }
-
-// Instantiations
-
-#define FILTER_ARGS(vector_type)\
-    const vector_map<vector_type>&,\
-    const min_max<texture_position_2D>&,\
-    const barycentric_2D&,\
-    wrap_method
-template color filter_catrom(FILTER_ARGS(color));
-template color filter_linear(FILTER_ARGS(color));
-template color filter_nearest(FILTER_ARGS(color));
-template displacement_3D filter_catrom(FILTER_ARGS(displacement_3D));
-template displacement_3D filter_linear(FILTER_ARGS(displacement_3D));
-template displacement_3D filter_nearest(FILTER_ARGS(displacement_3D));
-#undef FILTER_ARGS
