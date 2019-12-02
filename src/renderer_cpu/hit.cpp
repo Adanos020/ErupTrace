@@ -118,23 +118,21 @@ static auto ray_hits_children_of(const ray& in_ray, const BIH_node& in_node, con
     const size_t node_1 = size_t(in_ray.direction[axis] < 0);
     const size_t node_2 = 1 - node_1;
 
-    struct
+    struct child_hit_record
     {
-        bool occurred = false;
         bool is_left_node;
+        bool occurred = false;
         min_max<float> distances;
-    } hit_1, hit_2;
+    } hit_1{ node_1 == 0 }, hit_2{ node_2 == 0 };
 
     if (distances_to_splitting_planes[node_1] >= in_distances.min)
     {
         hit_1.occurred = true;
-        hit_1.is_left_node = node_1 == 0;
         hit_1.distances = { in_distances.min, std::min(in_distances.max, distances_to_splitting_planes[node_1]) };
     }
     if (distances_to_splitting_planes[node_2] <= in_distances.max)
     {
         hit_2.occurred = true;
-        hit_2.is_left_node = node_2 == 0;
         hit_2.distances = { std::max(in_distances.min, distances_to_splitting_planes[node_2]), in_distances.max };
     }
 
