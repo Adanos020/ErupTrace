@@ -115,7 +115,6 @@ render_plan render_plan::cornell_box(const extent_2D<uint32_t>& image_size)
     const material red_wall = world.add_diffuse_material(world.add_constant_texture(color{ 0.65f, 0.05f, 0.05f }));
     const material white_wall = world.add_diffuse_material(world.add_constant_texture(color{ 0.73f, 0.73f, 0.73f }));
     const material green_wall = world.add_diffuse_material(world.add_constant_texture(color{ 0.12f, 0.45f, 0.15f }));
-    const material light = world.add_emit_light_material(15.f, world.add_constant_texture(white));
 
     // box
     world.assemble_cuboid({
@@ -136,7 +135,7 @@ render_plan render_plan::cornell_box(const extent_2D<uint32_t>& image_size)
         },
         { -y_axis, -y_axis, -y_axis, -y_axis },
         {},
-        light,
+        world.add_emit_light_material(15.f, world.add_constant_texture(white)),
     });
 
     world.hierarchy = make_hierarchy(world.shapes);
@@ -184,6 +183,36 @@ render_plan render_plan::grass_block(const extent_2D<uint32_t>& image_size)
         glm::quat{ glm::vec3{ 0.f, 0.f, 0.f } },
         bottom_face, top_face, side_face, side_face, side_face, side_face,
     });
+
+    world.hierarchy = make_hierarchy(world.shapes);
+    return render_plan{ image_size, cam, std::move(world) };
+}
+
+render_plan render_plan::bunny(const extent_2D<uint32_t>& image_size)
+{
+    const camera cam = camera_create_info{
+        position_3D{ 2.5f, 2.f, 2.5f },
+        position_3D{ 0.f, 0.75f, 0.f },
+        y_axis,
+        45.f,
+        image_size.aspect(),
+        0.05f,
+        { 0.f, 1.f }
+    };
+
+    scene world;
+    world.sky = world.add_image_texture(
+        world.add_image("textures/sky.jpg"), { { 0, 0 }, { 2880, 1440 } },
+        wrap_method::repeat, filtering_method::linear);
+
+    world.add_plane_shape(plane{ position_3D{ 0.f, 0.f, 0.f }, x_axis, z_axis },
+        world.add_diffuse_material(world.add_constant_texture(color{ 0.4f, 0.8f, 0.3f })));
+
+    { // bunny
+        model_assembly_info bunny_info = load_model("models/bunny.obj");
+        bunny_info.mat = world.add_diffuse_material(world.add_constant_texture(white));
+        world.assemble_model(bunny_info);
+    }
 
     world.hierarchy = make_hierarchy(world.shapes);
     return render_plan{ image_size, cam, std::move(world) };

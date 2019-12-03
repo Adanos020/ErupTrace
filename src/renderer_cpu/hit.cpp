@@ -97,9 +97,9 @@ static hit_record ray_hits(const scene& in_scene, const shape& in_shape, const r
     if (hit.occurred)
     {
         hit.mat = in_shape.mat;
-        if (is_valid_index(hit.mat.normal_texture_index))
+        if (is_valid_index(hit.mat.normals_index))
         {
-            const normal_texture& normals = in_scene.normal_textures[hit.mat.normal_texture_index];
+            const normal_texture& normals = in_scene.normal_textures[hit.mat.normals_index];
             hit.normal = map_normal(hit.normal, normal_on_texture(in_scene, normals, hit.mapping));
         }
 

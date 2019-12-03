@@ -19,7 +19,7 @@ struct hit_record
 
     static hit_record nope()
     {
-        return hit_record{ 0.f, position_3D{ 0.f, 0.f, 0.f }, displacement_3D{ 0.f, 0.f, 0.f },
+        return hit_record{ 0.f, position_3D{ 0.f }, displacement_3D{ 0.f },
             material{ material_type::none, 0 }, barycentric_2D{ 0.f, 0.f }, false };
     }
 };

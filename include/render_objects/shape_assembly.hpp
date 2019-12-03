@@ -7,6 +7,8 @@
 
 #include <external/tiny_obj_loader.h>
 
+#include <glm/gtx/quaternion.hpp>
+
 #include <array>
 #include <vector>
 
@@ -37,3 +39,5 @@ struct model_assembly_info
     std::vector<vertex> vertices;
     material mat;
 };
+
+model_assembly_info load_model(const std::string_view path);
