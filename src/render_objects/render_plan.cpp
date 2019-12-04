@@ -155,8 +155,7 @@ render_plan render_plan::grass_block(const extent_2D<uint32_t>& image_size)
     };
 
     scene world;
-    world.sky = world.add_image_texture(
-        world.add_image("textures/sky.jpg"), { { 0, 0 }, { 2880, 1440 } },
+    world.sky = world.add_image_texture(world.add_image("textures/sky.jpg"),
         wrap_method::repeat, filtering_method::linear);
 
     const uint32_t grass_image = world.add_image("textures/mc_grass.png");
@@ -201,8 +200,7 @@ render_plan render_plan::bunny(const extent_2D<uint32_t>& image_size)
     };
 
     scene world;
-    world.sky = world.add_image_texture(
-        world.add_image("textures/sky.jpg"), { { 0, 0 }, { 2880, 1440 } },
+    world.sky = world.add_image_texture(world.add_image("textures/sky.jpg"),
         wrap_method::repeat, filtering_method::linear);
 
     world.add_plane_shape(plane{ position_3D{ 0.f, 0.f, 0.f }, x_axis, z_axis },
@@ -210,7 +208,9 @@ render_plan render_plan::bunny(const extent_2D<uint32_t>& image_size)
 
     { // bunny
         model_assembly_info bunny_info = load_model("models/bunny.obj");
-        bunny_info.mat = world.add_diffuse_material(world.add_constant_texture(white));
+//        bunny_info.mat = world.add_diffuse_material(world.add_constant_texture(white));
+        bunny_info.mat = world.add_dielectric_material(1.77f, world.add_constant_texture(color{ 15.f, 82.f, 186.f } / 255.f));
+//        bunny_info.mat = world.add_reflect_material(0.05f, world.add_constant_texture(white));
         world.assemble_model(bunny_info);
     }
 

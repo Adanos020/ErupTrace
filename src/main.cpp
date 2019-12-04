@@ -11,7 +11,7 @@
 #   define THREAD_COUNT 20
 #else
 #   define THREAD_COUNT 1
-#   define SINGLE_PIXEL_TEST 1
+#   define SINGLE_PIXEL_TEST 0
 #endif
 
 using namespace std::string_literals;

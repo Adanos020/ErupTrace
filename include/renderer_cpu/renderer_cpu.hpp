@@ -15,7 +15,6 @@ public:
     color render_single_pixel(const struct render_plan&, const pixel_position&) const;
 
 private:
-    std::vector<rgba> render_fragment(const struct render_plan*, const position_2D& top_left, const position_2D& bottom_right) const;
     color render_pixel(const struct render_plan&, const pixel_position&, const extent_2D<float>& inverse_size) const;
 
 private:

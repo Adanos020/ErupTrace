@@ -1,7 +1,6 @@
 #include <render_objects/scene.hpp>
 
 #include <external/stb_image.h>
-#include <external/tiny_obj_loader.h>
 
 #include <cstring>
 

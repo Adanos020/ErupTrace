@@ -9,71 +9,55 @@
 
 renderer_cpu::renderer_cpu(const uint32_t sample_count, const uint32_t thread_count)
     : sample_count(sample_count)
-    , thread_count(thread_count)
+    , thread_count(glm::clamp<uint32_t>(thread_count, 1, std::thread::hardware_concurrency()))
     , inverse_sample_count(1.f / sample_count)
 {
+    std::cout << "Rendering on " << this->thread_count << " CPU threads." << std::endl;
 }
 
-std::vector<rgba> renderer_cpu::render_scene(const render_plan& plan) const
+std::vector<rgba> renderer_cpu::render_scene(const render_plan& in_plan) const
 {
-    const uint32_t fragment_height = plan.image_size.height / this->thread_count;
-
-    std::cout << "Starting jobs... ";
-
-    std::vector<std::future<std::vector<rgba>>> image_fragments{ this->thread_count };
-    for (uint32_t i = 0; i < image_fragments.size(); ++i)
-    {
-        image_fragments[i] = std::async(std::launch::async, &renderer_cpu::render_fragment, this,
-            &plan, glm::uvec2{ 0, i * fragment_height },
-            glm::uvec2{ plan.image_size.width, (i + 1) * fragment_height });
-    }
-
-    std::cout << "Done." << std::endl;
     std::cout << "Rendering image fragments... 0.00%";
 
-    this->progress = 0.f;
-    std::vector<rgba> image;
-    for (uint32_t i = 0; i < image_fragments.size(); ++i)
+    const extent_2D<float> inverse_image_size = {
+        1.f / in_plan.image_size.width,
+        1.f / in_plan.image_size.height,
+    };
+    const size_t pixel_count = in_plan.image_size.width * in_plan.image_size.height;
+    const float inverse_pixel_count = 1.f / float(pixel_count);
+
+    std::vector<rgba> pixels(pixel_count);
     {
-        const std::vector<rgba> fragment = image_fragments[i].get();
-        image.insert(image.end(), fragment.begin(), fragment.end());
+        std::vector<std::future<void>> jobs;
+        jobs.reserve(this->thread_count);
+
+        this->progress = 0.f;
+        for (size_t i = 0; i < this->thread_count; ++i)
+        {
+            jobs.emplace_back(std::async(std::launch::async, [=, &in_plan, &pixels, &inverse_image_size]() {
+                for (size_t p = i; p < pixel_count; p += this->thread_count)
+                {
+                    const pixel_position pixel = {
+                        p % in_plan.image_size.width,
+                        p / in_plan.image_size.width,
+                    };
+                    pixels[p] = rgba{ to_rgb(this->render_pixel(in_plan, pixel, inverse_image_size)), 255 };
+
+                    std::lock_guard lock{ this->progress_mtx };
+                    this->progress += 100.f * inverse_pixel_count;
+                    std::cout << "\rRendering image fragments... " << std::fixed << std::setprecision(2) << this->progress << "%" << std::flush;
+                }
+            }));
+        }
     }
 
     std::cout << "\rRendering image fragments... Done.  " << std::endl;
-    return image;
+    return pixels;
 }
 
 color renderer_cpu::render_single_pixel(const render_plan& in_plan, const pixel_position& in_position) const
 {
     return this->render_pixel(in_plan, in_position, { 1.f / in_plan.image_size.width, 1.f / in_plan.image_size.height });
-}
-
-std::vector<rgba> renderer_cpu::render_fragment(const render_plan* in_plan, const position_2D& top_left,
-    const position_2D& bottom_right) const
-{
-    const uint32_t width = bottom_right.x - top_left.x;
-    const uint32_t height = bottom_right.y - top_left.y;
-    const extent_2D<float> inverse_image_size = {
-        1.f / in_plan->image_size.width,
-        1.f / in_plan->image_size.height,
-    };
-
-    std::vector<rgba> image_fragment;
-    image_fragment.reserve(width * height);
-
-    for (uint32_t y = top_left.y; y < bottom_right.y; ++y)
-    {
-        for (uint32_t x = top_left.x; x < bottom_right.x; ++x)
-        {
-            const color col = render_pixel(*in_plan, { x, y }, inverse_image_size);
-            image_fragment.push_back(rgba{ to_rgb(col), 255 });
-        }
-
-        std::lock_guard lock{ this->progress_mtx };
-        this->progress += 100.f * inverse_image_size.height;
-        std::cout << "\rRendering image fragments... " << std::fixed << std::setprecision(2) << this->progress << "%";
-    }
-    return image_fragment;
 }
 
 color renderer_cpu::render_pixel(const render_plan& in_plan, const pixel_position& in_position,
