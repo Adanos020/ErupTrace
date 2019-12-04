@@ -100,8 +100,8 @@ render_plan render_plan::test_scene(const extent_2D<uint32_t>& image_size)
 render_plan render_plan::cornell_box(const extent_2D<uint32_t>& image_size)
 {
     const camera cam = camera_create_info{
-        position_3D{ 278.f, 278.f, -800.f },
-        position_3D{ 278.f, 278.f, 0.f },
+        position_3D{ 0.f, 0.f, -1100.f },
+        position_3D{ 0.f },
         y_axis,
         40.f,
         image_size.aspect(),
@@ -118,20 +118,31 @@ render_plan render_plan::cornell_box(const extent_2D<uint32_t>& image_size)
 
     // box
     world.assemble_cuboid({
-        position_3D{ 555.f * 0.5f },
-        extent_3D{ 555.f * 0.5f, 555.f * 0.5f, 555.f * 0.5f },
-        {},
+        position_3D{ 0.f },
+        extent_3D{ 277.5f, 277.5f, 277.5f },
+        glm::quat{ glm::vec3{ 0.f, 0.f, 0.f } },
         white_wall, white_wall, green_wall, red_wall, no_wall, white_wall,
         true,
+    });
+    world.assemble_quad({
+        {
+            position_3D{ +277.5f, -277.5f, -277.5f },
+            position_3D{ +277.5f, +277.5f, -277.5f },
+            position_3D{ -277.5f, +277.5f, -277.5f },
+            position_3D{ -277.5f, -277.5f, -277.5f },
+        },
+        { -z_axis, -z_axis, -z_axis, -z_axis },
+        {},
+        no_wall,
     });
 
     // light
     world.assemble_quad({
         {
-            position_3D{ 213.f, 554.f, 213.f },
-            position_3D{ 343.f, 554.f, 213.f },
-            position_3D{ 343.f, 554.f, 343.f },
-            position_3D{ 213.f, 554.f, 343.f },
+            position_3D{ +130.f, 277.f, -130.f },
+            position_3D{ +130.f, 277.f, +130.f },
+            position_3D{ -130.f, 277.f, +130.f },
+            position_3D{ -130.f, 277.f, -130.f },
         },
         { -y_axis, -y_axis, -y_axis, -y_axis },
         {},

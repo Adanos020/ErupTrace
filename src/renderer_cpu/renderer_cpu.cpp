@@ -41,7 +41,8 @@ std::vector<rgba> renderer_cpu::render_scene(const render_plan& in_plan) const
                         p % in_plan.image_size.width,
                         p / in_plan.image_size.width,
                     };
-                    pixels[p] = rgba{ to_rgb(this->render_pixel(in_plan, pixel, inverse_image_size)), 255 };
+                    const color pixel_color = this->render_pixel(in_plan, pixel, inverse_image_size);
+                    pixels[p] = rgba{ to_rgb(pixel_color), 255 };
 
                     std::lock_guard lock{ this->progress_mtx };
                     this->progress += 100.f * inverse_pixel_count;
