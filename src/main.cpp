@@ -45,7 +45,7 @@ int main()
 {
     try
     {
-        const extent_2D<uint32_t> image_size = { 1280, 720 };
+        const extent_2D<uint32_t> image_size = { 500, 500 };
         const render_plan plan = render_plan::cornell_box(image_size);
         renderer_cpu renderer{ 500, THREAD_COUNT };
 #if SINGLE_PIXEL_TEST

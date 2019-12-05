@@ -26,6 +26,31 @@ static constexpr direction_2D down_2D = { 0.f, -1.f };
 static constexpr direction_2D left_2D = { 1.f, 0.f };
 static constexpr direction_2D right_2D = { 1.f, 0.f };
 
+class ortho_normal_base
+{
+public:
+    constexpr ortho_normal_base(const direction_3D& in_w)
+        : axis()
+    {
+        this->axis[2] = in_w;
+        const glm::vec3 a = (glm::abs(in_w.x) > 0.9f) ? y_axis : x_axis;
+        this->axis[1] = glm::normalize(glm::cross(in_w, a));
+        this->axis[0] = glm::cross(in_w, this->v());
+    }
+
+    const glm::vec3& u() const { return this->axis[0]; }
+    const glm::vec3& v() const { return this->axis[1]; }
+    const glm::vec3& w() const { return this->axis[2]; }
+
+    glm::vec3 local(const glm::vec3& in_v) const
+    {
+        return (in_v.x * this->u()) + (in_v.y * this->v()) + (in_v.z * this->w());
+    }
+
+private:
+    direction_3D axis[3];
+};
+
 inline static direction_3D map_normal(const direction_3D& in_world_normal, const direction_3D& in_mapped_normal)
 {
     displacement_3D t = glm::cross(in_world_normal, y_axis);

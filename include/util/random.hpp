@@ -49,7 +49,7 @@ inline static position_3D random_point_in_unit_cube()
     return position_3D{ random_uniform(-1.f, 1.f), random_uniform(-1.f, 1.f), random_uniform(-1.f, 1.f) };
 }
 
-inline static displacement_3D random_direction()
+inline static displacement_3D random_in_unit_sphere()
 {
     while (true)
     {
@@ -60,7 +60,25 @@ inline static displacement_3D random_direction()
     }
 }
 
+inline static direction_3D random_on_unit_sphere()
+{
+    return glm::normalize(random_point_in_unit_cube());
+}
+
+inline static direction_3D random_cosine_direction()
+{
+    const float r_1 = random_uniform<float>();
+    const float r_2 = random_uniform<float>();
+    const float sqrt_r_2 = glm::sqrt(r_2);
+    const float phi = glm::two_pi<float>() * r_1;
+    return direction_3D{
+        glm::cos(phi) * sqrt_r_2,
+        glm::sin(phi) * sqrt_r_2,
+        glm::sqrt(1 - r_2),
+    };
+}
+
 inline static position_3D random_in_unit_disk(const direction_3D& in_axis = z_axis)
 {
-    return (direction_3D{ 1.f } - in_axis) * random_direction();
+    return (direction_3D{ 1.f } - in_axis) * random_in_unit_sphere();
 }

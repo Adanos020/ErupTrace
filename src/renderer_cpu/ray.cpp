@@ -52,9 +52,10 @@ color ray::trace(const scene& in_scene, const int32_t depth) const
             return color{ 0.5f } + color{ 0.5f * hit.normal };
 #else
             const color emitted = emit(in_scene, hit.mat, hit);
-            if (scattering_record scattering = scatter(in_scene, hit.mat, *this, hit); scattering.occurred)
+            if (const scattering_record scattering = scatter(in_scene, hit.mat, *this, hit); scattering.occurred)
             {
-                return emitted + scattering.attenuation * scattering.scattered_ray.trace(in_scene, depth - 1);
+                const color next_rays_color = scattering.scattered_ray.trace(in_scene, depth - 1);
+                return emitted + (scattering.albedo * scattering.pdf * next_rays_color / scattering.material_pdf);
             }
             return emitted;
 #endif

@@ -23,6 +23,5 @@ private:
 
     const float inverse_sample_count;
 
-    mutable float progress = 0.f;
     mutable std::mutex progress_mtx;
 };

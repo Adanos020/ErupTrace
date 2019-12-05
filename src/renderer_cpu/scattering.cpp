@@ -26,7 +26,8 @@ static scattering_record scatter(const scene& in_scene, const dielectric_materia
     const displacement_3D refracted = glm::refract(glm::normalize(in_ray.direction), outward_normal, eta);
 
     const float reflect_probability = refracted != displacement_3D{ 0.f }
-        ? Schlick(cosine, in_dielectric.refractive_index) : 1.f;
+        ? Schlick(cosine, in_dielectric.refractive_index)
+        : 1.f;
 
     const color col = color_on_texture(in_scene, in_dielectric.albedo, in_hit.mapping, in_hit.point);
     if (random_chance(reflect_probability))
@@ -39,11 +40,15 @@ static scattering_record scatter(const scene& in_scene, const dielectric_materia
 
 static scattering_record scatter(const scene& in_scene, const diffuse_material& in_diffuse, const ray& in_ray, const hit_record& in_hit)
 {
-    const position_3D target = in_hit.point + in_hit.normal + random_direction();
-    return scattering_record{
-        color_on_texture(in_scene, in_diffuse.albedo, in_hit.mapping, in_hit.point),
-        ray{ line{ in_hit.point, target - in_hit.point }, in_ray.time },
-    };
+    const direction_3D direction = glm::normalize(ortho_normal_base{ in_hit.normal }.local(random_cosine_direction()));
+    const ray scattered_ray{ line{ in_hit.point, direction }, in_ray.time };
+    const color albedo = color_on_texture(in_scene, in_diffuse.albedo, in_hit.mapping, in_hit.point);
+
+    const float cosine = glm::dot(in_hit.normal, scattered_ray.direction);
+    const float scattering_pdf = float(cosine >= 0) * cosine * glm::one_over_pi<float>();
+    const float material_pdf = glm::dot(in_hit.normal, scattered_ray.direction) * glm::one_over_pi<float>();
+    
+    return scattering_record{ albedo, scattered_ray, scattering_pdf, material_pdf };
 }
 
 static scattering_record scatter(const scene& in_scene, const emit_light_material& in_emit_light, const ray& in_ray, const hit_record& in_hit)
@@ -54,7 +59,7 @@ static scattering_record scatter(const scene& in_scene, const emit_light_materia
 static scattering_record scatter(const scene& in_scene, const reflect_material& in_reflect, const ray& in_ray, const hit_record& in_hit)
 {
     const displacement_3D reflected = glm::reflect(in_ray.direction, in_hit.normal);
-    const ray scattered = { line{ in_hit.point, reflected + (in_reflect.fuzz * random_direction()) }, in_ray.time };
+    const ray scattered = { line{ in_hit.point, reflected + (in_reflect.fuzz * random_in_unit_sphere()) }, in_ray.time };
     if (glm::dot(scattered.direction, in_hit.normal) > 0.f)
     {
         return scattering_record{ color_on_texture(in_scene, in_reflect.albedo, in_hit.mapping, in_hit.point), scattered };

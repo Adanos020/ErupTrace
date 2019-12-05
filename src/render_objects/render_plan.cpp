@@ -116,12 +116,12 @@ render_plan render_plan::cornell_box(const extent_2D<uint32_t>& image_size)
     const material white_wall = world.add_diffuse_material(world.add_constant_texture(color{ 0.73f, 0.73f, 0.73f }));
     const material green_wall = world.add_diffuse_material(world.add_constant_texture(color{ 0.12f, 0.45f, 0.15f }));
 
-    // box
+    // cornell box
     world.assemble_cuboid({
         position_3D{ 0.f },
         extent_3D{ 277.5f, 277.5f, 277.5f },
         glm::quat{ glm::vec3{ 0.f, 0.f, 0.f } },
-        white_wall, white_wall, green_wall, red_wall, no_wall, white_wall,
+        white_wall, white_wall, red_wall, green_wall, no_wall, white_wall,
         true,
     });
     world.assemble_quad({
@@ -136,13 +136,27 @@ render_plan render_plan::cornell_box(const extent_2D<uint32_t>& image_size)
         no_wall,
     });
 
+    // cuboids inside
+    world.assemble_cuboid({
+        position_3D{ -65.f, -194.5f, -130.f },
+        extent_3D{ 82.5f, 82.5f, 82.5f },
+        glm::quat{ glm::vec3{ 0.f, glm::radians(-18.f), 0.f } },
+        white_wall, white_wall, white_wall, white_wall, white_wall, white_wall,
+    });
+    world.assemble_cuboid({
+        position_3D{ 70.f, -112.f, 100.f },
+        extent_3D{ 82.5f, 165.f, 82.5f },
+        glm::quat{ glm::vec3{ 0.f, glm::radians(15.f), 0.f } },
+        white_wall, white_wall, white_wall, white_wall, white_wall, white_wall,
+    });
+
     // light
     world.assemble_quad({
         {
-            position_3D{ +130.f, 277.f, -130.f },
-            position_3D{ +130.f, 277.f, +130.f },
-            position_3D{ -130.f, 277.f, +130.f },
-            position_3D{ -130.f, 277.f, -130.f },
+            position_3D{ +65.f, 277.f, -65.f },
+            position_3D{ +65.f, 277.f, +65.f },
+            position_3D{ -65.f, 277.f, +65.f },
+            position_3D{ -65.f, 277.f, -65.f },
         },
         { -y_axis, -y_axis, -y_axis, -y_axis },
         {},

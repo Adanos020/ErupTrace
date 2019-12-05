@@ -24,17 +24,17 @@ std::vector<rgba> renderer_cpu::render_scene(const render_plan& in_plan) const
         1.f / in_plan.image_size.height,
     };
     const size_t pixel_count = in_plan.image_size.width * in_plan.image_size.height;
-    const float inverse_pixel_count = 1.f / float(pixel_count);
+    const float pixel_percentage = 100.f / float(pixel_count);
 
     std::vector<rgba> pixels(pixel_count);
     {
         std::vector<std::future<void>> jobs;
         jobs.reserve(this->thread_count);
 
-        this->progress = 0.f;
+        std::atomic<int> rendered_pixels_count = 0;
         for (size_t i = 0; i < this->thread_count; ++i)
         {
-            jobs.emplace_back(std::async(std::launch::async, [=, &in_plan, &pixels, &inverse_image_size]() {
+            jobs.emplace_back(std::async(std::launch::async, [&, i]() {
                 for (size_t p = i; p < pixel_count; p += this->thread_count)
                 {
                     const pixel_position pixel = {
@@ -44,9 +44,12 @@ std::vector<rgba> renderer_cpu::render_scene(const render_plan& in_plan) const
                     const color pixel_color = this->render_pixel(in_plan, pixel, inverse_image_size);
                     pixels[p] = rgba{ to_rgb(pixel_color), 255 };
 
+                    ++rendered_pixels_count;
                     std::lock_guard lock{ this->progress_mtx };
-                    this->progress += 100.f * inverse_pixel_count;
-                    std::cout << "\rRendering image fragments... " << std::fixed << std::setprecision(2) << this->progress << "%" << std::flush;
+                    std::cout
+                        << "\rRendering image fragments... "
+                        << std::fixed << std::setprecision(2)
+                        << float(rendered_pixels_count) * pixel_percentage << "%";
                 }
             }));
         }
