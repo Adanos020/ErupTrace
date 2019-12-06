@@ -3,6 +3,8 @@
 #include <util/colors.hpp>
 #include <util/vector.hpp>
 
+#include <glm/gtx/optimum_pow.hpp>
+
 #include <chrono>
 #include <random>
 #include <type_traits>
@@ -74,6 +76,20 @@ inline static direction_3D random_cosine_direction()
     return direction_3D{
         glm::cos(phi) * sqrt_r_2,
         glm::sin(phi) * sqrt_r_2,
+        glm::sqrt(1 - r_2),
+    };
+}
+
+inline static direction_3D random_to_sphere(const float in_radius, const float in_square_distance)
+{
+    const float r_1 = random_uniform<float>();
+    const float r_2 = random_uniform<float>();
+    const float z = 1.f + (r_2 * (glm::sqrt(1.f - (glm::pow2(in_radius) / in_square_distance)) - 1.f));
+    const float phi = glm::two_pi<float>() * r_1;
+    const float sqrt_1_minus_square_z = glm::sqrt(1.f - glm::pow2(z));
+    return direction_3D{
+        glm::cos(phi) * sqrt_1_minus_square_z,
+        glm::sin(phi) * sqrt_1_minus_square_z,
         glm::sqrt(1 - r_2),
     };
 }

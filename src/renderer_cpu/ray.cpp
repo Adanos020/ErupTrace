@@ -52,10 +52,17 @@ color ray::trace(const scene& in_scene, const int32_t depth) const
             return color{ 0.5f } + color{ 0.5f * hit.normal };
 #else
             const color emitted = emit(in_scene, hit.mat, hit);
-            if (const scattering_record scattering = scatter(in_scene, hit.mat, *this, hit); scattering.occurred)
+            if (const scatter_record scattering = scatter(in_scene, hit.mat, *this, hit); scattering.occurred)
             {
-                const color next_rays_color = scattering.scattered_ray.trace(in_scene, depth - 1);
-                return emitted + (scattering.albedo * scattering.pdf * next_rays_color / scattering.material_pdf);
+                if (scattering.is_specular)
+                {
+                    return scattering.albedo * scattering.scattered_ray.trace(in_scene, depth - 1);
+                }
+                else
+                {
+                    const color next_rays_color = scattering.scattered_ray.trace(in_scene, depth - 1);
+                    return emitted + (scattering.albedo * scattering.PDF * next_rays_color / scattering.material_PDF);
+                }
             }
             return emitted;
 #endif

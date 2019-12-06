@@ -3,6 +3,7 @@
 #include <render_objects/render_plan.hpp>
 #include <renderer_cpu/ray.hpp>
 #include <util/random.hpp>
+#include <util/vector.hpp>
 
 #include <iomanip>
 #include <iostream>
@@ -74,8 +75,8 @@ color renderer_cpu::render_pixel(const render_plan& in_plan, const pixel_positio
             (in_position.x + random_uniform<float>()) * in_inverse_size.width,
             (in_plan.image_size.height - in_position.y + random_uniform<float>()) * in_inverse_size.height,
         };
-        col += ray::shoot(in_plan.cam, ray_direction).trace(in_plan.world);
+        col += remove_NaNs(ray::shoot(in_plan.cam, ray_direction).trace(in_plan.world));
     }
     col *= this->inverse_sample_count;
-    return col = { glm::sqrt(col.r), glm::sqrt(col.g), glm::sqrt(col.b) };
+    return glm::sqrt(col);
 }

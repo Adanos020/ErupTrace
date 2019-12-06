@@ -7,7 +7,7 @@
 
 #include <stack>
 
-static hit_record ray_hits(const plane_shape& in_plane, const ray& in_ray, const min_max<float>& in_distances)
+hit_record ray_hits(const plane_shape& in_plane, const ray& in_ray, const min_max<float>& in_distances)
 {
     const direction_3D plane_normal = glm::normalize(glm::cross(in_plane.right, in_plane.up));
     if (const float dot = glm::dot(plane_normal, in_ray.direction); dot != 0.f)
@@ -24,7 +24,7 @@ static hit_record ray_hits(const plane_shape& in_plane, const ray& in_ray, const
     return hit_record::nope();
 }
 
-static hit_record ray_hits(const sphere_shape& in_sphere, const ray& in_ray, const min_max<float>& in_distances)
+hit_record ray_hits(const sphere_shape& in_sphere, const ray& in_ray, const min_max<float>& in_distances)
 {
     const displacement_3D oc = in_ray.origin - in_sphere.origin;
     const float a = glm::dot(in_ray.direction, in_ray.direction);
@@ -52,7 +52,7 @@ static hit_record ray_hits(const sphere_shape& in_sphere, const ray& in_ray, con
     return hit_record::nope();
 }
 
-static hit_record ray_hits(const triangle_shape& in_triangle, const ray& in_ray, const min_max<float>& in_distances)
+hit_record ray_hits(const triangle_shape& in_triangle, const ray& in_ray, const min_max<float>& in_distances)
 {
     // Möller-Trumbore algorithm
     const displacement_3D edge_1 = in_triangle.b - in_triangle.a;
@@ -64,17 +64,17 @@ static hit_record ray_hits(const triangle_shape& in_triangle, const ray& in_ray,
         const float inverse_determinant = 1.f / determinant;
         const displacement_3D t_vec = in_ray.origin - in_triangle.a;
         const displacement_3D q_vec = glm::cross(t_vec, edge_1);
-        const float u = glm::dot(t_vec, p_vec) * inverse_determinant;
-        const float v = glm::dot(in_ray.direction, q_vec) * inverse_determinant;
-        if (u >= 0.f && u <= 1.f && v >= 0.f && u + v <= 1.f)
+        const float U = glm::dot(t_vec, p_vec) * inverse_determinant;
+        const float V = glm::dot(in_ray.direction, q_vec) * inverse_determinant;
+        if (U >= 0.f && U <= 1.f && V >= 0.f && U + V <= 1.f)
         {
             if (const float distance = glm::dot(q_vec, edge_2) * inverse_determinant; in_distances.is_value_clamped(distance))
             {
                 const position_3D hit_point = in_ray.point_at_distance(distance);
-                const direction_3D normal = ((1.f - u - v) * in_triangle.normal_a) + (u * in_triangle.normal_b) + (v * in_triangle.normal_c);
+                const direction_3D normal = ((1.f - U - V) * in_triangle.normal_a) + (U * in_triangle.normal_b) + (V * in_triangle.normal_c);
                 const barycentric_2D mapping = {
-                    ((1.f - u - v) * in_triangle.mapping_a.U) + (u * in_triangle.mapping_b.U) + (v * in_triangle.mapping_c.U),
-                    ((1.f - u - v) * in_triangle.mapping_a.V) + (u * in_triangle.mapping_b.V) + (v * in_triangle.mapping_c.V),
+                    ((1.f - U - V) * in_triangle.mapping_a.U) + (U * in_triangle.mapping_b.U) + (V * in_triangle.mapping_c.U),
+                    ((1.f - U - V) * in_triangle.mapping_a.V) + (U * in_triangle.mapping_b.V) + (V * in_triangle.mapping_c.V),
                 };
                 return hit_record{ distance, hit_point, normal, {}, mapping };
             }

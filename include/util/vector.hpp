@@ -51,6 +51,23 @@ private:
     direction_3D axis[3];
 };
 
+template <int32_t L, typename T, enum glm::qualifier Q = glm::packed_highp>
+inline static glm::vec<L, T, Q> square_length(const glm::vec<L, T, Q>& in_vec)
+{
+    return glm::dot(in_vec, in_vec);
+}
+
+template <int32_t L, typename T, enum glm::qualifier Q = glm::packed_highp>
+inline static glm::vec<L, T, Q> remove_NaNs(const glm::vec<L, T, Q>& in_vec)
+{
+    glm::vec<L, T, Q> ret_vec;
+    for (int32_t i = 0; i < L; ++i)
+    {
+        ret_vec[i] = glm::isnan(in_vec[i]) ? T{ 0 } : in_vec[i];
+    }
+    return ret_vec;
+}
+
 inline static direction_3D map_normal(const direction_3D& in_world_normal, const direction_3D& in_mapped_normal)
 {
     displacement_3D t = glm::cross(in_world_normal, y_axis);

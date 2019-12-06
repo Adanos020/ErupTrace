@@ -194,12 +194,21 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
     const direction_3D normal_f = (-z_axis * in_info.rotation) * face_sign;
     const direction_3D normal_b = (+z_axis * in_info.rotation) * face_sign;
 
+    const displacement_3D vertex_ldf = in_info.rotation * displacement_3D{ -width, -height, -depth };
+    const displacement_3D vertex_ldb = in_info.rotation * displacement_3D{ -width, -height, +depth };
+    const displacement_3D vertex_luf = in_info.rotation * displacement_3D{ -width, +height, -depth };
+    const displacement_3D vertex_lub = in_info.rotation * displacement_3D{ -width, +height, +depth };
+    const displacement_3D vertex_rdf = in_info.rotation * displacement_3D{ +width, -height, -depth };
+    const displacement_3D vertex_rdb = in_info.rotation * displacement_3D{ +width, -height, +depth };
+    const displacement_3D vertex_ruf = in_info.rotation * displacement_3D{ +width, +height, -depth };
+    const displacement_3D vertex_rub = in_info.rotation * displacement_3D{ +width, +height, +depth };
+
     this->assemble_quad({
         {
-            in_info.origin + (in_info.rotation * displacement_3D{ +width, -height, -depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ +width, -height, +depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ -width, -height, +depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ -width, -height, -depth }),
+            in_info.origin + vertex_rdf,
+            in_info.origin + vertex_rdb,
+            in_info.origin + vertex_ldb,
+            in_info.origin + vertex_ldf,
         },
         { normal_d, normal_d, normal_d, normal_d },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
@@ -207,10 +216,10 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
     });
     this->assemble_quad({
         {
-            in_info.origin + (in_info.rotation * displacement_3D{ +width, height, -depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ +width, height, +depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ -width, height, +depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ -width, height, -depth }),
+            in_info.origin + vertex_ruf,
+            in_info.origin + vertex_rub,
+            in_info.origin + vertex_lub,
+            in_info.origin + vertex_luf,
         },
         { normal_u, normal_u, normal_u, normal_u },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
@@ -218,10 +227,10 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
     });
     this->assemble_quad({
         {
-            in_info.origin + (in_info.rotation * displacement_3D{ -width, -height, +depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ -width, +height, +depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ -width, +height, -depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ -width, -height, -depth }),
+            in_info.origin + vertex_ldb,
+            in_info.origin + vertex_lub,
+            in_info.origin + vertex_luf,
+            in_info.origin + vertex_ldf,
         },
         { normal_l, normal_l, normal_l, normal_l },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
@@ -229,10 +238,10 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
     });
     this->assemble_quad({
         {
-            in_info.origin + (in_info.rotation * displacement_3D{ width, -height, +depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ width, +height, +depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ width, +height, -depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ width, -height, -depth }),
+            in_info.origin + vertex_rdb,
+            in_info.origin + vertex_rub,
+            in_info.origin + vertex_ruf,
+            in_info.origin + vertex_rdf,
         },
         { normal_r, normal_r, normal_r, normal_r },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
@@ -240,10 +249,10 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
     });
     this->assemble_quad({
         {
-            in_info.origin + (in_info.rotation * displacement_3D{ +width, -height, -depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ +width, +height, -depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ -width, +height, -depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ -width, -height, -depth }),
+            in_info.origin + vertex_rdf,
+            in_info.origin + vertex_ruf,
+            in_info.origin + vertex_luf,
+            in_info.origin + vertex_ldf,
         },
         { normal_f, normal_f, normal_f, normal_f },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },
@@ -251,10 +260,10 @@ void scene::assemble_cuboid(const cuboid_assembly_info& in_info)
     });
     this->assemble_quad({
         {
-            in_info.origin + (in_info.rotation * displacement_3D{ +width, -height, depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ +width, +height, depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ -width, +height, depth }),
-            in_info.origin + (in_info.rotation * displacement_3D{ -width, -height, depth }),
+            in_info.origin + vertex_rdb,
+            in_info.origin + vertex_rub,
+            in_info.origin + vertex_lub,
+            in_info.origin + vertex_ldb,
         },
         { normal_b, normal_b, normal_b, normal_b },
         { barycentric_2D{ 0.f, 1.f }, { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f } },

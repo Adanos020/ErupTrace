@@ -54,6 +54,14 @@ struct plane
 struct triangle
 {
     position_3D a, b, c;
+
+    float area() const
+    {
+        const float ab = glm::distance(this->a, this->b);
+        const float ac = glm::distance(this->a, this->c);
+        const float theta = glm::acos(glm::dot(this->b - this->a, this->c - this->a) / (ab * ac));
+        return 0.5f * ab * ac * glm::sin(theta);
+    }
 };
 
 struct axis_aligned_box
