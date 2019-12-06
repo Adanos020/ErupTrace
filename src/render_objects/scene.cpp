@@ -24,6 +24,7 @@ std::vector<uint8_t> scene::to_bytes() const
     const size_t constant_textures_size = sizeof(constant_texture) * this->constant_textures.size();
     const size_t image_textures_size = sizeof(image_texture) * this->image_textures.size();
     const size_t noise_textures_size = sizeof(noise_texture) * this->noise_textures.size();
+    const size_t normal_textures_size = sizeof(normal_texture) * this->normal_textures.size();
 
     std::vector<uint8_t> bytes(sky_size
         + hierarchy_size
@@ -39,7 +40,8 @@ std::vector<uint8_t> scene::to_bytes() const
         + checker_textures_size
         + constant_textures_size
         + image_textures_size
-        + noise_textures_size, 0);
+        + noise_textures_size
+        + normal_textures_size, 0);
 
     size_t current_position = 0;
     const auto append_data = [&](auto* source, const size_t size)
@@ -62,6 +64,7 @@ std::vector<uint8_t> scene::to_bytes() const
     append_data(this->constant_textures.data(), constant_textures_size);
     append_data(this->image_textures.data(), image_textures_size);
     append_data(this->noise_textures.data(), noise_textures_size);
+    append_data(this->normal_textures.data(), normal_textures_size);
 
     return bytes;
 }
@@ -86,6 +89,7 @@ size_t scene::size() const
     const size_t constant_textures_size = sizeof(constant_texture) * this->constant_textures.size();
     const size_t image_textures_size = sizeof(image_texture) * this->image_textures.size();
     const size_t noise_textures_size = sizeof(noise_texture) * this->noise_textures.size();
+    const size_t normal_textures_size = sizeof(normal_texture) * this->normal_textures.size();
 
     return sky_size
         + hierarchy_size
@@ -101,7 +105,8 @@ size_t scene::size() const
         + checker_textures_size
         + constant_textures_size
         + image_textures_size
-        + noise_textures_size;
+        + noise_textures_size
+        + normal_textures_size;
 }
 
 // Shapes
