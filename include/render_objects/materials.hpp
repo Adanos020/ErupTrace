@@ -17,6 +17,7 @@ struct material
     material_type type;
     array_index index;
     invalidable_array_index normals_index = -1;
+    bool resample = false;
 };
 
 struct dielectric_material

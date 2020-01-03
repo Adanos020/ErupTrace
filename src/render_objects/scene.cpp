@@ -11,6 +11,7 @@ std::vector<uint8_t> scene::to_bytes() const
 
     const size_t infinite_shapes_size = sizeof(shape) * this->infinite_shapes.size();
     const size_t shapes_size = sizeof(shape) * this->shapes.size();
+    const size_t resampled_shapes_size = sizeof(array_index) * this->resampled_shapes.size();
     const size_t sphere_shapes_size = sizeof(sphere_shape) * this->sphere_shapes.size();
     const size_t plane_shapes_size = sizeof(plane_shape) * this->plane_shapes.size();
     const size_t triangle_shapes_size = sizeof(triangle_shape) * this->triangle_shapes.size();
@@ -30,6 +31,7 @@ std::vector<uint8_t> scene::to_bytes() const
         + hierarchy_size
         + infinite_shapes_size
         + shapes_size
+        + resampled_shapes_size
         + sphere_shapes_size
         + plane_shapes_size
         + triangle_shapes_size
@@ -53,6 +55,7 @@ std::vector<uint8_t> scene::to_bytes() const
     append_data(this->hierarchy.data(), hierarchy_size);
     append_data(this->infinite_shapes.data(), infinite_shapes_size);
     append_data(this->shapes.data(), shapes_size);
+    append_data(this->resampled_shapes.data(), resampled_shapes_size);
     append_data(this->sphere_shapes.data(), sphere_shapes_size);
     append_data(this->plane_shapes.data(), plane_shapes_size);
     append_data(this->triangle_shapes.data(), triangle_shapes_size);
@@ -76,6 +79,7 @@ size_t scene::size() const
 
     const size_t infinite_shapes_size = sizeof(shape) * this->infinite_shapes.size();
     const size_t shapes_size = sizeof(shape) * this->shapes.size();
+    const size_t resampled_shapes_size = sizeof(array_index) * this->resampled_shapes.size();
     const size_t sphere_shapes_size = sizeof(sphere_shape) * this->sphere_shapes.size();
     const size_t plane_shapes_size = sizeof(plane_shape) * this->plane_shapes.size();
     const size_t triangle_shapes_size = sizeof(triangle_shape) * this->triangle_shapes.size();
@@ -95,6 +99,7 @@ size_t scene::size() const
         + hierarchy_size
         + infinite_shapes_size
         + shapes_size
+        + resampled_shapes_size
         + sphere_shapes_size
         + plane_shapes_size
         + triangle_shapes_size
@@ -111,11 +116,25 @@ size_t scene::size() const
 
 // Shapes
 
+shape scene::add_shape(const shape& in_shape)
+{
+    if (in_shape.mat.resample)
+    {
+        this->resampled_shapes.push_back(in_shape);
+    }
+    this->shapes.push_back(in_shape);
+    return this->shapes.back();
+}
+
+shape scene::add_shape(const shape_type in_type, const array_index in_index, const material& in_material, const axis_aligned_box& in_box)
+{
+    return add_shape(shape{ in_type, in_index, in_material, in_box });
+}
+
 shape scene::add_plane_shape(const plane_shape& in_plane, const material& in_material)
 {
-    this->infinite_shapes.push_back(shape{ shape_type::plane, this->plane_shapes.size(), in_material, axis_aligned_box::zero() });
     this->plane_shapes.push_back(in_plane);
-    return this->infinite_shapes.back();
+    return this->add_shape(shape_type::plane, this->plane_shapes.size() - 1, in_material, axis_aligned_box::zero());
 }
 
 shape scene::add_plane_shape(const plane& in_plane, const material& in_material)
@@ -125,9 +144,8 @@ shape scene::add_plane_shape(const plane& in_plane, const material& in_material)
 
 shape scene::add_sphere_shape(const sphere_shape& in_sphere, const material& in_material)
 {
-    this->shapes.push_back(shape{ shape_type::sphere, this->sphere_shapes.size(), in_material, in_sphere.bounding_box() });
     this->sphere_shapes.push_back(in_sphere);
-    return this->shapes.back();
+    return this->add_shape(shape_type::sphere, this->sphere_shapes.size() - 1, in_material, in_sphere.bounding_box());
 }
 
 shape scene::add_sphere_shape(const sphere& in_sphere, const direction_3D& in_axial_tilt, const material& in_material)
@@ -137,9 +155,8 @@ shape scene::add_sphere_shape(const sphere& in_sphere, const direction_3D& in_ax
 
 shape scene::add_triangle_shape(const triangle_shape& in_triangle, const material& in_material)
 {
-    this->shapes.push_back(shape{ shape_type::triangle, this->triangle_shapes.size(), in_material, in_triangle.bounding_box() });
     this->triangle_shapes.push_back(in_triangle);
-    return this->shapes.back();
+    return this->add_shape(shape_type::triangle, this->triangle_shapes.size() - 1, in_material, in_triangle.bounding_box());
 }
 
 shape scene::add_triangle_shape(const triangle& in_triangle, const std::array<direction_3D, 3>& in_normals,
@@ -308,7 +325,12 @@ void scene::assemble_model(const model_assembly_info& in_info)
 material scene::add_dielectric_material(const dielectric_material& in_material, const invalidable_array_index normal_map_index)
 {
     this->dielectric_materials.push_back(in_material);
-    return material{ material_type::dielectric, this->dielectric_materials.size() - 1, normal_map_index };
+    return material{
+        material_type::dielectric,
+        this->dielectric_materials.size() - 1,
+        normal_map_index,
+        in_material.refractive_index > 1.f,
+    };
 }
 
 material scene::add_dielectric_material(const float in_refractive_index, const texture& in_albedo, const texture& in_normals)
@@ -328,7 +350,12 @@ material scene::add_dielectric_material(const float in_refractive_index, const t
 material scene::add_diffuse_material(const diffuse_material& in_material, const invalidable_array_index normal_map_index)
 {
     this->diffuse_materials.push_back(in_material);
-    return material{ material_type::diffuse, this->diffuse_materials.size() - 1, normal_map_index };
+    return material{
+        material_type::diffuse,
+        this->diffuse_materials.size() - 1,
+        normal_map_index,
+        false,
+    };
 }
 
 material scene::add_diffuse_material(const texture& in_albedo, const texture& in_normals)
@@ -348,7 +375,12 @@ material scene::add_diffuse_material(const texture& in_albedo)
 material scene::add_emit_light_material(const emit_light_material& in_material, const invalidable_array_index normal_map_index)
 {
     this->emit_light_materials.push_back(in_material);
-    return material{ material_type::emit_light, this->emit_light_materials.size() - 1, normal_map_index };
+    return material{
+        material_type::emit_light,
+        this->emit_light_materials.size() - 1,
+        normal_map_index,
+        in_material.intensity > 0.f,
+    };
 }
 
 material scene::add_emit_light_material(const float in_intensity, const texture& in_emit, const texture& in_normals)
@@ -368,7 +400,12 @@ material scene::add_emit_light_material(const float in_intensity, const texture&
 material scene::add_reflect_material(const reflect_material& in_material, const invalidable_array_index normal_map_index)
 {
     this->reflect_materials.push_back(in_material);
-    return material{ material_type::reflect, this->reflect_materials.size() - 1, normal_map_index };
+    return material{
+        material_type::reflect,
+        this->reflect_materials.size() - 1,
+        normal_map_index,
+        true,
+    };
 }
 
 material scene::add_reflect_material(const float in_fuzz, const texture& in_albedo, const texture& in_normals)

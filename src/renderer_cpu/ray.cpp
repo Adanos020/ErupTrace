@@ -7,6 +7,7 @@
 #include <renderer_cpu/hit.hpp>
 #include <renderer_cpu/scattering.hpp>
 #include <renderer_cpu/textures.hpp>
+#include <util/density_functions.hpp>
 #include <util/random.hpp>
 
 #define DRAW_NORMALS 0
@@ -52,7 +53,7 @@ color ray::trace(const scene& in_scene, const int32_t depth) const
             return color{ 0.5f } + color{ 0.5f * hit.normal };
 #else
             const color emitted = emit(in_scene, hit.mat, hit);
-            if (const scatter_record scattering = scatter(in_scene, hit.mat, *this, hit); scattering.occurred)
+            if (scatter_record scattering = scatter(in_scene, hit.mat, *this, hit); scattering.occurred)
             {
                 if (scattering.is_specular)
                 {
@@ -60,8 +61,19 @@ color ray::trace(const scene& in_scene, const int32_t depth) const
                 }
                 else
                 {
+                    const array_index resampled_index = random_uniform<size_t>(0, in_scene.resampled_shapes.size() - 1);
+                    const shape& resampled = in_scene.resampled_shapes[resampled_index];
+
+                    const float resampled_PDF = shape_PDF_value(in_scene, resampled, scattering.scattered_ray);
+                    const float PDF = glm::mix(resampled_PDF, scattering.PDF, 0.5f);
+
+                    if (random_chance())
+                    {
+                        scattering.scattered_ray.direction = shape_PDF_generate(in_scene, resampled, hit.point);
+                    }
+                    
                     const color next_rays_color = scattering.scattered_ray.trace(in_scene, depth - 1);
-                    return emitted + (scattering.albedo * scattering.PDF * next_rays_color / scattering.material_PDF);
+                    return emitted + (scattering.albedo * scattering.PDF * next_rays_color / PDF);
                 }
             }
             return emitted;

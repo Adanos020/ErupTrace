@@ -52,7 +52,7 @@ private:
 };
 
 template <int32_t L, typename T, enum glm::qualifier Q = glm::packed_highp>
-inline static glm::vec<L, T, Q> square_length(const glm::vec<L, T, Q>& in_vec)
+inline static T square_length(const glm::vec<L, T, Q>& in_vec)
 {
     return glm::dot(in_vec, in_vec);
 }
@@ -63,7 +63,7 @@ inline static glm::vec<L, T, Q> remove_NaNs(const glm::vec<L, T, Q>& in_vec)
     glm::vec<L, T, Q> ret_vec;
     for (int32_t i = 0; i < L; ++i)
     {
-        ret_vec[i] = glm::isnan(in_vec[i]) ? T{ 0 } : in_vec[i];
+        ret_vec[i] = glm::isnan(in_vec[i]) ? T(0) : in_vec[i];
     }
     return ret_vec;
 }

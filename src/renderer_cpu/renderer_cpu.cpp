@@ -62,7 +62,8 @@ std::vector<rgba> renderer_cpu::render_scene(const render_plan& in_plan) const
 
 color renderer_cpu::render_single_pixel(const render_plan& in_plan, const pixel_position& in_position) const
 {
-    return this->render_pixel(in_plan, in_position, { 1.f / in_plan.image_size.width, 1.f / in_plan.image_size.height });
+    return this->render_pixel(in_plan, in_position,
+        { 1.f / in_plan.image_size.width, 1.f / in_plan.image_size.height });
 }
 
 color renderer_cpu::render_pixel(const render_plan& in_plan, const pixel_position& in_position,
@@ -77,6 +78,5 @@ color renderer_cpu::render_pixel(const render_plan& in_plan, const pixel_positio
         };
         col += remove_NaNs(ray::shoot(in_plan.cam, ray_direction).trace(in_plan.world));
     }
-    col *= this->inverse_sample_count;
-    return glm::sqrt(col);
+    return glm::sqrt(col * this->inverse_sample_count);
 }

@@ -21,9 +21,13 @@ struct scene
 
     std::vector<shape> infinite_shapes;
     std::vector<shape> shapes;
+    std::vector<shape> resampled_shapes;
     std::vector<sphere_shape> sphere_shapes;
     std::vector<plane_shape> plane_shapes;
     std::vector<triangle_shape> triangle_shapes;
+
+    shape add_shape(const shape&);
+    shape add_shape(const shape_type, array_index index, const material&, const axis_aligned_box&);
 
     shape add_plane_shape(const plane_shape&, const material&);
     shape add_plane_shape(const plane&, const material&);

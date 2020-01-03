@@ -11,7 +11,7 @@
 
 inline static bool random_chance(const float in_probability = 0.5f)
 {
-#if NDEBUG
+#ifdef NDEBUG
     static const auto seed = uint32_t(std::chrono::system_clock::now().time_since_epoch().count());
 #else
     static const uint32_t seed = 2137;
@@ -26,7 +26,12 @@ inline static auto random_uniform(const T in_min = T(0), const T in_max = T(1))
 {
     static_assert(std::is_arithmetic_v<T>);
 
+#ifdef NDEBUG
     static const auto seed = uint32_t(std::chrono::system_clock::now().time_since_epoch().count());
+#else
+    static const uint32_t seed = 2137;
+#endif
+
     static std::default_random_engine rng{ seed };
 
     if constexpr (std::is_integral_v<T>)
@@ -51,22 +56,6 @@ inline static position_3D random_point_in_unit_cube()
     return position_3D{ random_uniform(-1.f, 1.f), random_uniform(-1.f, 1.f), random_uniform(-1.f, 1.f) };
 }
 
-inline static displacement_3D random_in_unit_sphere()
-{
-    while (true)
-    {
-        if (const displacement_3D dir = random_point_in_unit_cube(); glm::dot(dir, dir) < 1.f)
-        {
-            return dir;
-        }
-    }
-}
-
-inline static direction_3D random_on_unit_sphere()
-{
-    return glm::normalize(random_point_in_unit_cube());
-}
-
 inline static direction_3D random_cosine_direction()
 {
     const float r_1 = random_uniform<float>();
@@ -78,6 +67,11 @@ inline static direction_3D random_cosine_direction()
         glm::sin(phi) * sqrt_r_2,
         glm::sqrt(1 - r_2),
     };
+}
+
+inline static displacement_3D random_in_unit_sphere()
+{
+    return random_cosine_direction() * random_color();
 }
 
 inline static direction_3D random_to_sphere(const float in_radius, const float in_square_distance)
@@ -96,5 +90,5 @@ inline static direction_3D random_to_sphere(const float in_radius, const float i
 
 inline static position_3D random_in_unit_disk(const direction_3D& in_axis = z_axis)
 {
-    return (direction_3D{ 1.f } - in_axis) * random_in_unit_sphere();
+    return random_in_unit_sphere() * (direction_3D{ 1.f } - in_axis);
 }
