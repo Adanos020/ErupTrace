@@ -7,6 +7,8 @@
 #include <iostream>
 #include <string>
 
+#define NDEBUG
+
 #ifdef NDEBUG
 #   define THREAD_COUNT 20
 #else
@@ -45,9 +47,9 @@ int main()
 {
     try
     {
-        const extent_2D<uint32_t> image_size = { 500, 500 };
-        const render_plan plan = render_plan::cornell_box(image_size);
-        renderer_cpu renderer{ 500, THREAD_COUNT };
+        const extent_2D<uint32_t> image_size = { 512, 512 };
+        render_plan plan = render_plan::bunny(image_size);
+        renderer_cpu renderer{ 9, THREAD_COUNT };
 #if SINGLE_PIXEL_TEST
         const pixel_position pixel_pos = { 254, 400 };
         const color pixel = renderer.render_single_pixel(plan, pixel_pos);

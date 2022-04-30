@@ -215,10 +215,10 @@ render_plan render_plan::grass_block(const extent_2D<uint32_t>& image_size)
 render_plan render_plan::bunny(const extent_2D<uint32_t>& image_size)
 {
     const camera cam = camera_create_info{
-        position_3D{ 2.5f, 2.f, 2.5f },
-        position_3D{ 0.f, 0.75f, 0.f },
+        position_3D{ 1.5f, 2.f, 1.5f },
+        position_3D{ 0.f, 0.5f, 0.f },
         y_axis,
-        45.f,
+        90.f,
         image_size.aspect(),
         0.05f,
         { 0.f, 1.f }
@@ -228,13 +228,51 @@ render_plan render_plan::bunny(const extent_2D<uint32_t>& image_size)
     world.sky = world.add_image_texture(world.add_image("textures/sky.jpg"),
         wrap_method::repeat, filtering_method::linear);
 
-    world.add_plane_shape(plane{ position_3D{ 0.f, 0.f, 0.f }, x_axis, z_axis },
-        world.add_diffuse_material(world.add_constant_texture(color{ 0.4f, 0.8f, 0.3f })));
+    material ground_mat = world.add_diffuse_material(world.add_constant_texture(green));
+
+    world.add_triangle_shape(
+        triangle{
+            position_3D { -10.f, 0.f,  10.f },
+            position_3D {  10.f, 0.f,  10.f },
+            position_3D {  10.f, 0.f, -10.f },
+        },
+        std::array<direction_3D, 3>{
+            direction_3D { 0.f, 1.f, 0.f },
+            direction_3D { 0.f, 1.f, 0.f },
+            direction_3D { 0.f, 1.f, 0.f },
+        },
+        std::array<barycentric_2D, 3>{
+            barycentric_2D {  0.f, 10.f },
+            barycentric_2D { 10.f, 10.f },
+            barycentric_2D { 10.f,  0.f },
+        },
+        ground_mat
+    );
+    world.add_triangle_shape(
+        triangle{
+            position_3D { -10.f, 0.f,  10.f },
+            position_3D {  10.f, 0.f, -10.f },
+            position_3D { -10.f, 0.f, -10.f },
+        },
+        std::array<direction_3D, 3>{
+            direction_3D { 0.f, 1.f, 0.f },
+            direction_3D { 0.f, 1.f, 0.f },
+            direction_3D { 0.f, 1.f, 0.f },
+        },
+        std::array<barycentric_2D, 3>{
+            barycentric_2D {  0.f, 10.f },
+            barycentric_2D { 10.f,  0.f },
+            barycentric_2D {  0.f,  0.f },
+        },
+        ground_mat
+    );
+    // world.add_plane_shape(plane{ position_3D{ 0.f, 0.f, 0.f }, x_axis, z_axis },
+    //     world.add_diffuse_material(world.add_constant_texture(color{ 0.4f, 0.8f, 0.3f })));
 
     { // bunny
         model_assembly_info bunny_info = load_model("models/bunny.obj");
 //        bunny_info.mat = world.add_diffuse_material(world.add_constant_texture(white));
-        bunny_info.mat = world.add_dielectric_material(1.77f, world.add_constant_texture(color{ 15.f, 82.f, 186.f } / 255.f));
+        bunny_info.mat = world.add_dielectric_material(1.5f, world.add_constant_texture(red));
 //        bunny_info.mat = world.add_reflect_material(0.05f, world.add_constant_texture(white));
         world.assemble_model(bunny_info);
     }

@@ -1,7 +1,7 @@
 // BIH implementation based on papers:
 // 
 // Instant Ray Tracing: The Bounding Interval Hierarchy
-// Carsten Wächter and Alexander Keller
+// Carsten Wï¿½chter and Alexander Keller
 // University of Ulm
 // http://ainc.de/Research/BIH.pdf
 // 
@@ -15,6 +15,7 @@
 #include <util/pairs.hpp>
 
 #include <algorithm>
+#include <iostream>
 
 // Construction
 
@@ -127,5 +128,51 @@ bounding_interval_hierarchy make_hierarchy(std::vector<shape>& in_shapes)
     nodes.reserve(2 * in_shapes.size());
     make_hierarchy(iterator_pair{ in_shapes }, in_shapes, calculate_bounds(in_shapes), 0, nodes);
     nodes.shrink_to_fit();
+
+    std::cout << "&nodes = [" << std::endl;
+    for (auto& node : nodes)
+    {
+        std::cout << "    BihNode {" << std::endl;
+        switch (node.type)
+        {
+            case BIH_node_type::leaf:
+                std::cout << "        ty: Leaf," << std::endl;
+                std::cout << "        data: Leaf {" << std::endl;
+                std::cout << "            triangle_index: " << node.shape_group.index << "," << std::endl;
+                std::cout << "            count: " << node.shape_group.count << "," << std::endl;
+                std::cout << "        }," << std::endl;
+                break;
+            case BIH_node_type::x:
+                std::cout << "        ty: X," << std::endl;
+                std::cout << "        data: Branch {" << std::endl;
+                std::cout << "            clip_left: " << node.clip.left << "," << std::endl;
+                std::cout << "            clip_right: " << node.clip.right << "," << std::endl;
+                std::cout << "            child_left: " << node.children.left << "," << std::endl;
+                std::cout << "            child_right: " << node.children.right << "," << std::endl;
+                std::cout << "        }," << std::endl;
+                break;
+            case BIH_node_type::y:
+                std::cout << "        ty: Y," << std::endl;
+                std::cout << "        data: Branch {" << std::endl;
+                std::cout << "            clip_left: " << node.clip.left << "," << std::endl;
+                std::cout << "            clip_right: " << node.clip.right << "," << std::endl;
+                std::cout << "            child_left: " << node.children.left << "," << std::endl;
+                std::cout << "            child_right: " << node.children.right << "," << std::endl;
+                std::cout << "        }," << std::endl;
+                break;
+            case BIH_node_type::z:
+                std::cout << "        ty: Y," << std::endl;
+                std::cout << "        data: Branch {" << std::endl;
+                std::cout << "            clip_left: " << node.clip.left << "," << std::endl;
+                std::cout << "            clip_right: " << node.clip.right << "," << std::endl;
+                std::cout << "            child_left: " << node.children.left << "," << std::endl;
+                std::cout << "            child_right: " << node.children.right << "," << std::endl;
+                std::cout << "        }," << std::endl;
+                break;
+        }
+        std::cout << "    }," << std::endl;
+    }
+    std::cout << "]" << std::endl;
+
     return nodes;
 }

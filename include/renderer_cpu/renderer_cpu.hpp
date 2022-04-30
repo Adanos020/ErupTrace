@@ -11,11 +11,11 @@ class renderer_cpu
 {
 public:
     renderer_cpu(uint32_t sample_count, uint32_t thread_count);
-    std::vector<rgba> render_scene(const struct render_plan&) const;
-    color render_single_pixel(const struct render_plan&, const pixel_position&) const;
+    std::vector<rgba> render_scene(struct render_plan&) const;
+    color render_single_pixel(struct render_plan&, const pixel_position&) const;
 
 private:
-    color render_pixel(const struct render_plan&, const pixel_position&, const extent_2D<float>& inverse_size) const;
+    color render_pixel(struct render_plan&, const pixel_position&, const extent_2D<float>& inverse_size) const;
 
 private:
     const uint32_t sample_count;

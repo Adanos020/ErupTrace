@@ -27,4 +27,4 @@ struct hit_record
 hit_record ray_hits(const plane_shape&, const ray&, const min_max<float>& distances);
 hit_record ray_hits(const sphere_shape&, const ray&, const min_max<float>& distances);
 hit_record ray_hits(const triangle_shape&, const ray&, const min_max<float>& distances);
-hit_record ray_hits_anything(const struct scene&, const ray&);
+hit_record ray_hits_anything(struct scene&, const ray&);

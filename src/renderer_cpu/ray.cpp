@@ -42,12 +42,16 @@ ray ray::shoot(const camera& in_camera, const barycentric_2D& in_screen_UV)
     };
 }
 
-color ray::trace(const scene& in_scene, const int32_t depth) const
+color ray::trace(scene& in_scene, const int32_t depth) const
 {
     if (depth > 0)
     {
         if (const hit_record hit = ray_hits_anything(in_scene, *this); hit.occurred)
         {
+            if (hit.mat.index == 0) return red;
+            if (hit.mat.index == 1) return blue;
+            if (hit.mat.index == 2) return yellow;
+            if (hit.mat.index == 3) return green;
 #if DRAW_NORMALS
             return color{ 0.5f } + color{ 0.5f * hit.normal };
 #else

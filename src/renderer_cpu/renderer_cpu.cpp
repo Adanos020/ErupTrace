@@ -16,7 +16,7 @@ renderer_cpu::renderer_cpu(const uint32_t sample_count, const uint32_t thread_co
     std::cout << "Rendering on " << this->thread_count << " CPU threads." << std::endl;
 }
 
-std::vector<rgba> renderer_cpu::render_scene(const render_plan& in_plan) const
+std::vector<rgba> renderer_cpu::render_scene(render_plan& in_plan) const
 {
     std::cout << "Rendering image fragments... 0.00%";
 
@@ -60,12 +60,12 @@ std::vector<rgba> renderer_cpu::render_scene(const render_plan& in_plan) const
     return pixels;
 }
 
-color renderer_cpu::render_single_pixel(const render_plan& in_plan, const pixel_position& in_position) const
+color renderer_cpu::render_single_pixel(render_plan& in_plan, const pixel_position& in_position) const
 {
     return this->render_pixel(in_plan, in_position, { 1.f / in_plan.image_size.width, 1.f / in_plan.image_size.height });
 }
 
-color renderer_cpu::render_pixel(const render_plan& in_plan, const pixel_position& in_position,
+color renderer_cpu::render_pixel(render_plan& in_plan, const pixel_position& in_position,
     const extent_2D<float>& in_inverse_size) const
 {
     color col{ 0.f };

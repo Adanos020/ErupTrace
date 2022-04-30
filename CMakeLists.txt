@@ -15,17 +15,8 @@ add_executable(ErupTrace ${SOURCES})
 if (UNIX)
 	set(THREADS_PREFER_PTHREAD_FLAG ON)
 	find_package(Threads REQUIRED)
-	find_package(Vulkan REQUIRED)
-	target_link_libraries(ErupTrace PUBLIC
-		Threads::Threads
-		Vulkan::Vulkan
-		shaderc_shared)
+	target_link_libraries(ErupTrace PUBLIC Threads::Threads)
 elseif (WIN32)
 	find_package(glm CONFIG REQUIRED)
-	find_package(Vulkan REQUIRED)
-	find_library(SHADERC shaderc_combined)
-	target_link_libraries(ErupTrace PRIVATE
-		glm
-		Vulkan::Vulkan
-		${SHADERC})
+	target_link_libraries(ErupTrace PRIVATE glm)
 endif()
